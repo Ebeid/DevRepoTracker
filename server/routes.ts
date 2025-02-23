@@ -10,12 +10,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/repositories", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     const repositories = await storage.getRepositories(req.user.id);
-    res.json(repositories);
+
+    // Add mock analytics data for demonstration
+    const repositoriesWithAnalytics = repositories.map(repo => ({
+      ...repo,
+      forks: Math.floor(Math.random() * 100),
+      openIssues: Math.floor(Math.random() * 50),
+      watchers: Math.floor(Math.random() * 200),
+      lastCommitDate: new Date().toISOString(),
+      language: ["TypeScript", "JavaScript", "Python", "Go"][Math.floor(Math.random() * 4)],
+      topics: ["web", "react", "nodejs", "api"].slice(0, Math.floor(Math.random() * 4)),
+      contributorsCount: Math.floor(Math.random() * 20),
+      weeklyCommitCount: Math.floor(Math.random() * 100),
+    }));
+
+    res.json(repositoriesWithAnalytics);
   });
 
   app.post("/api/repositories", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    
+
     const parsed = insertRepositorySchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json(parsed.error);

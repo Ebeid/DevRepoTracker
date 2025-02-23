@@ -1,8 +1,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { Repository } from "@shared/schema";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Star, Lock, Globe } from "lucide-react";
+import { Star, Lock, Globe, BarChart2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import RepositoryAnalytics from "./repository-analytics";
 
 export default function RepositoryList() {
   const { data: repositories, isLoading } = useQuery<Repository[]>({
@@ -42,17 +51,32 @@ export default function RepositoryList() {
       {repositories.map((repo) => (
         <Card key={repo.id}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {repo.isPrivate ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-              <a
-                href={repo.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                {repo.name}
-              </a>
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                {repo.isPrivate ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                <a
+                  href={repo.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  {repo.name}
+                </a>
+              </CardTitle>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <BarChart2 className="w-4 h-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl">
+                  <DialogHeader>
+                    <DialogTitle>Repository Analytics - {repo.name}</DialogTitle>
+                  </DialogHeader>
+                  <RepositoryAnalytics repository={repo} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
