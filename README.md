@@ -100,3 +100,30 @@ The application will be available at `http://localhost:5000`
 - TanStack Query for data fetching
 - shadcn/ui components
 - Tailwind CSS for styling
+
+## Configuring Webhook Events
+For each repository you want to monitor:
+
+1. Navigate to the repository's analytics panel in the application
+2. Click on the "Webhook" tab
+3. Click "Enable Webhook" to generate a webhook secret
+4. Copy the webhook URL and secret
+5. Add these to your GitHub repository's webhook settings
+6. The application will now receive real-time updates for:
+   - Push events (commits)
+   - Pull request events (open, close, etc.)
+
+## Troubleshooting
+- If you encounter database connection issues, ensure your PostgreSQL server is running and the connection details in `.env` are correct
+- For webhook-related issues, check the GitHub repository's webhook settings and ensure the secret matches
+- Make sure your application is accessible from GitHub's webhook service if you're testing locally (you may need to use a service like ngrok)
+
+## Environment Variables Reference
+- `DATABASE_URL`: PostgreSQL connection string
+- `PGUSER`: PostgreSQL username
+- `PGHOST`: PostgreSQL host
+- `PGPASSWORD`: PostgreSQL password
+- `PGDATABASE`: PostgreSQL database name
+- `PGPORT`: PostgreSQL port
+- `SESSION_SECRET`: Secret for session management (make it long and random)
+- `NODE_ENV`: Application environment ('development' or 'production')
