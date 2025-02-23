@@ -63,12 +63,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: req.user.username,
         },
       });
+      console.log(`Successfully sent message to SQS for repository: ${repository.name}`);
     } catch (error) {
+      // Log the error but don't fail the request
       console.error('Failed to send message to SQS:', error);
-      // Continue with the response even if SQS fails
+      res.setHeader('X-SQS-Error', 'Failed to send repository notification');
     }
 
-    res.status(201).json(repository);
+    res.status(201).json({
+      ...repository,
+      notification: (error) ? 'queued_with_errors' : 'queued'
+    });
   });
 
   app.get("/api/repositories/search", async (req, res) => {
