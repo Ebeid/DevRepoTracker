@@ -47,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const repository = await storage.addRepository(req.user.id, parsed.data);
 
     // Send message to SQS queue about the new repository
+    let sqsError = null;
     try {
       await sendToQueue({
         event: 'repository_added',
@@ -67,12 +68,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       // Log the error but don't fail the request
       console.error('Failed to send message to SQS:', error);
+      sqsError = error;
       res.setHeader('X-SQS-Error', 'Failed to send repository notification');
     }
 
     res.status(201).json({
       ...repository,
-      notification: (error) ? 'queued_with_errors' : 'queued'
+      notification: sqsError ? 'queued_with_errors' : 'queued'
     });
   });
 
