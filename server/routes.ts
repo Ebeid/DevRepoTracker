@@ -5,6 +5,7 @@ import { storage } from "./storage";
 import { insertRepositorySchema } from "@shared/schema";
 import crypto from "crypto";
 import { sendToQueue, getRetryQueueStatus } from "./utils/sqs";
+import { formatMessage } from "./utils/message-templates";
 
 function verifyGithubWebhook(secret: string, signature: string | undefined, body: any): boolean {
   if (!signature) return false;
@@ -49,8 +50,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Send message to SQS queue about the new repository
     let sqsError = null;
     try {
+      const messageText = formatMessage('repository_added', {
+        repository,
+        user: {
+          id: req.user.id,
+          username: req.user.username,
+        }
+      });
+
       await sendToQueue({
         event: 'repository_added',
+        message: messageText,
         timestamp: new Date().toISOString(),
         repository: {
           id: repository.id,
@@ -141,6 +151,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     const event = req.headers['x-github-event'] as string;
     if (event === 'push' || event === 'pull_request') {
+      // Store webhook event
       await storage.addWebhookEvent({
         repositoryId: repository.id,
         type: event,
@@ -148,6 +159,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         sender: req.body.sender.login,
         payload: JSON.stringify(req.body),
       });
+
+      // Send templated message to SQS
+      try {
+        const messageText = formatMessage(event as any, {
+          repository,
+          sender: req.body.sender.login,
+          action: event === 'pull_request' ? req.body.action : undefined
+        });
+
+        await sendToQueue({
+          event,
+          message: messageText,
+          timestamp: new Date().toISOString(),
+          repository: {
+            id: repository.id,
+            name: repository.name,
+            fullName: repository.fullName,
+            url: repository.url
+          },
+          sender: req.body.sender.login,
+          action: event === 'pull_request' ? req.body.action : undefined
+        });
+      } catch (error) {
+        console.error(`Failed to send templated message to SQS for ${event} event:`, error);
+      }
     }
 
     res.sendStatus(200);
