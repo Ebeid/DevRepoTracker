@@ -10,17 +10,30 @@ A comprehensive developer platform for managing and tracking GitHub repositories
 - Authentication system
 
 ## Prerequisites
-- Node.js v20+ (recommended)
-- PostgreSQL 15+
+- Docker and Docker Compose
 - Git
 
-## Local Development Setup
+## Quick Start with Docker
 
 1. Clone the repository
 ```bash
 git clone <your-repo-url>
 cd <repo-name>
 ```
+
+2. Start the application with Docker Compose
+```bash
+docker-compose up --build
+```
+
+The application will be available at `http://localhost:5000`
+
+## Local Development Setup (without Docker)
+
+1. Prerequisites:
+- Node.js v20+ (recommended)
+- PostgreSQL 15+
+- Git
 
 2. Install dependencies
 ```bash
@@ -55,18 +68,21 @@ npm run db:push
 npm run dev
 ```
 
-The application will be available at `http://localhost:5000`
-
 ## Available Scripts
-
 - `npm run dev` - Start the development server
 - `npm run build` - Build the application for production
 - `npm run start` - Start the production server
 - `npm run check` - Run TypeScript type checking
 - `npm run db:push` - Push schema changes to the database
 
-## Setting up GitHub Webhooks
+## Docker Commands
+- `docker-compose up --build` - Build and start all services
+- `docker-compose down` - Stop all services
+- `docker-compose down -v` - Stop all services and remove volumes
+- `docker-compose exec app npm run db:push` - Run database migrations
+- `docker-compose logs -f` - View logs from all services
 
+## Setting up GitHub Webhooks
 1. In your repository's settings on GitHub, go to Webhooks > Add webhook
 2. For the Payload URL, use: `http://your-domain/api/webhook/<repository-id>`
 3. Content type: `application/json`
@@ -76,7 +92,6 @@ The application will be available at `http://localhost:5000`
    - Pull requests
 
 ## Project Structure
-
 ```
 ├── client/                 # Frontend React application
 │   ├── src/
@@ -117,6 +132,12 @@ For each repository you want to monitor:
 - If you encounter database connection issues, ensure your PostgreSQL server is running and the connection details in `.env` are correct
 - For webhook-related issues, check the GitHub repository's webhook settings and ensure the secret matches
 - Make sure your application is accessible from GitHub's webhook service if you're testing locally (you may need to use a service like ngrok)
+- When using Docker, make sure ports 5000 and 5432 are not already in use
+
+## Docker Troubleshooting
+- If the app container fails to start, check the logs with `docker-compose logs app`
+- If the database connection fails, ensure the database container is running with `docker-compose ps`
+- To reset the database, remove the volumes with `docker-compose down -v` and start again
 
 ## Environment Variables Reference
 - `DATABASE_URL`: PostgreSQL connection string
