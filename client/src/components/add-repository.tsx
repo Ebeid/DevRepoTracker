@@ -15,12 +15,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRepositorySchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function AddRepository() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
-  
+
   const form = useForm({
     resolver: zodResolver(insertRepositorySchema),
     defaultValues: {
@@ -38,13 +38,24 @@ export default function AddRepository() {
       const res = await apiRequest("POST", "/api/repositories", data);
       return res.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/repositories"] });
       setOpen(false);
       form.reset();
+
+      // Show notification status in toast
+      const notificationStatus = data.notification === 'queued' 
+        ? { icon: CheckCircle2, message: 'Repository added and notification queued successfully.' }
+        : { icon: AlertCircle, message: 'Repository added but notification queuing had errors.' };
+
       toast({
         title: "Repository added",
-        description: "The repository has been added to your list.",
+        description: (
+          <div className="flex items-center gap-2">
+            <notificationStatus.icon className={`w-4 h-4 ${data.notification === 'queued' ? 'text-green-500' : 'text-yellow-500'}`} />
+            <span>{notificationStatus.message}</span>
+          </div>
+        ),
       });
     },
     onError: (error: Error) => {
