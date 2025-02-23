@@ -4,7 +4,7 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertRepositorySchema } from "@shared/schema";
 import crypto from "crypto";
-import { sendToQueue } from "./utils/sqs";
+import { sendToQueue, getRetryQueueStatus } from "./utils/sqs";
 
 function verifyGithubWebhook(secret: string, signature: string | undefined, body: any): boolean {
   if (!signature) return false;
@@ -72,9 +72,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('X-SQS-Error', 'Failed to send repository notification');
     }
 
+    // Get retry queue status if there was an error
+    const retryStatus = sqsError ? getRetryQueueStatus() : null;
+
     res.status(201).json({
       ...repository,
-      notification: sqsError ? 'queued_with_errors' : 'queued'
+      notification: sqsError ? 'queued_with_errors' : 'queued',
+      retryStatus: retryStatus ? {
+        inRetryQueue: true,
+        queueSize: retryStatus.queueSize,
+        retryAttempts: retryStatus.messages.length
+      } : null
     });
   });
 
@@ -143,6 +151,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     res.sendStatus(200);
+  });
+
+  // Add new route to check message retry status
+  app.get("/api/message-retry-status", (req, res) => {
+    if (!req.isAuthenticated()) return res.sendStatus(401);
+    res.json(getRetryQueueStatus());
   });
 
   const httpServer = createServer(app);

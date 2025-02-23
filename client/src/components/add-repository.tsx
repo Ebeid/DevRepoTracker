@@ -46,7 +46,14 @@ export default function AddRepository() {
       // Show notification status in toast
       const notificationStatus = data.notification === 'queued' 
         ? { icon: CheckCircle2, message: 'Repository added and notification queued successfully.' }
-        : { icon: AlertCircle, message: 'Repository added but notification queuing had errors.' };
+        : { 
+            icon: AlertCircle, 
+            message: `Repository added but notification queuing had errors. ${
+              data.retryStatus 
+                ? `Retry attempt ${data.retryStatus.retryAttempts} of 3 scheduled.` 
+                : ''
+            }`
+          };
 
       toast({
         title: "Repository added",
