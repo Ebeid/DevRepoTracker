@@ -1,0 +1,102 @@
+# GitHub Repository Manager
+
+A comprehensive developer platform for managing and tracking GitHub repositories with advanced automated scanning and webhook integration capabilities.
+
+## Features
+- Repository management and tracking
+- GitHub webhook integration for real-time updates
+- Automated repository scanning
+- Analytics dashboard
+- Authentication system
+
+## Prerequisites
+- Node.js v20+ (recommended)
+- PostgreSQL 15+
+- Git
+
+## Local Development Setup
+
+1. Clone the repository
+```bash
+git clone <your-repo-url>
+cd <repo-name>
+```
+
+2. Install dependencies
+```bash
+npm install
+```
+
+3. Set up your PostgreSQL database
+   - Create a new PostgreSQL database
+   - Note down the connection details (host, port, database name, username, password)
+
+4. Create a `.env` file in the root directory with the following variables:
+```env
+# Database
+DATABASE_URL=postgres://<username>:<password>@<host>:<port>/<database>
+PGUSER=<username>
+PGHOST=<host>
+PGPASSWORD=<password>
+PGDATABASE=<database>
+PGPORT=<port>
+
+# Session
+SESSION_SECRET=<your-session-secret>
+```
+
+5. Push the database schema
+```bash
+npm run db:push
+```
+
+6. Start the development server
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5000`
+
+## Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run start` - Start the production server
+- `npm run check` - Run TypeScript type checking
+- `npm run db:push` - Push schema changes to the database
+
+## Setting up GitHub Webhooks
+
+1. In your repository's settings on GitHub, go to Webhooks > Add webhook
+2. For the Payload URL, use: `http://your-domain/api/webhook/<repository-id>`
+3. Content type: `application/json`
+4. Secret: Use the webhook secret provided when enabling webhooks in the repository analytics panel
+5. Select events:
+   - Push events
+   - Pull requests
+
+## Project Structure
+
+```
+├── client/                 # Frontend React application
+│   ├── src/
+│   │   ├── components/    # React components
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── lib/          # Utility functions
+│   │   └── pages/        # Page components
+├── server/                # Backend Express application
+│   ├── auth.ts           # Authentication setup
+│   ├── routes.ts         # API routes
+│   └── storage.ts        # Database operations
+└── shared/               # Shared code between frontend and backend
+    └── schema.ts         # Database schema and types
+```
+
+## Tech Stack
+- React (frontend)
+- Express (backend)
+- TypeScript
+- PostgreSQL with Drizzle ORM
+- TanStack Query for data fetching
+- shadcn/ui components
+- Tailwind CSS for styling
