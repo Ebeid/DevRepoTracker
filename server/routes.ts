@@ -4,6 +4,7 @@ import { setupAuth } from "./auth";
 import { storage } from "./storage";
 import { insertRepositorySchema } from "@shared/schema";
 import crypto from "crypto";
+import { sendToQueue } from "./utils/sqs";
 
 function verifyGithubWebhook(secret: string, signature: string | undefined, body: any): boolean {
   if (!signature) return false;
@@ -44,6 +45,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const repository = await storage.addRepository(req.user.id, parsed.data);
+
+    // Send message to SQS queue about the new repository
+    try {
+      await sendToQueue({
+        event: 'repository_added',
+        timestamp: new Date().toISOString(),
+        repository: {
+          id: repository.id,
+          name: repository.name,
+          fullName: repository.fullName,
+          url: repository.url,
+          userId: req.user.id,
+        },
+        user: {
+          id: req.user.id,
+          username: req.user.username,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to send message to SQS:', error);
+      // Continue with the response even if SQS fails
+    }
+
     res.status(201).json(repository);
   });
 
