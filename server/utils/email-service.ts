@@ -1,12 +1,14 @@
-import { MailService } from '@sendgrid/mail';
-import { Repository } from '@shared/schema';
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { Repository } from "@shared/schema";
 
-if (!process.env.SENDGRID_API_KEY) {
-  throw new Error("SENDGRID_API_KEY environment variable must be set");
-}
-
-const mailService = new MailService();
-mailService.setApiKey(process.env.SENDGRID_API_KEY);
+// Initialize SES client
+const sesClient = new SESClient({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+});
 
 const NOTIFICATION_EMAIL = 'esoliman@gmail.com';
 
@@ -16,36 +18,51 @@ export async function sendEmailNotification(
   eventType: string
 ) {
   try {
-    const emailContent = {
-      to: NOTIFICATION_EMAIL,
-      from: 'esoliman@gmail.com', // Use the same email as recipient for initial testing.  Change to verified sender in production.
-      subject: `Repository Event: ${eventType}`,
-      text: messageText,
-      html: `
-        <h2>Repository Event Notification</h2>
-        <p>${messageText}</p>
-        <hr>
-        <h3>Event Details:</h3>
-        <ul>
-          <li>Repository: ${repository.name}</li>
-          <li>Event Type: ${eventType}</li>
-          <li>Time: ${new Date().toLocaleString()}</li>
-        </ul>
-        <p>View repository: <a href="${repository.url}">${repository.url}</a></p>
-      `,
-    };
+    const command = new SendEmailCommand({
+      Destination: {
+        ToAddresses: [NOTIFICATION_EMAIL],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: "UTF-8",
+            Data: `
+              <h2>Repository Event Notification</h2>
+              <p>${messageText}</p>
+              <hr>
+              <h3>Event Details:</h3>
+              <ul>
+                <li>Repository: ${repository.name}</li>
+                <li>Event Type: ${eventType}</li>
+                <li>Time: ${new Date().toLocaleString()}</li>
+              </ul>
+              <p>View repository: <a href="${repository.url}">${repository.url}</a></p>
+            `,
+          },
+          Text: {
+            Charset: "UTF-8",
+            Data: messageText,
+          },
+        },
+        Subject: {
+          Charset: "UTF-8",
+          Data: `Repository Event: ${eventType}`,
+        },
+      },
+      Source: NOTIFICATION_EMAIL, // The sender email must be verified in SES
+    });
 
-    await mailService.send(emailContent);
-    console.log('Email notification sent successfully');
+    await sesClient.send(command);
+    console.log('Email notification sent successfully via AWS SES');
     return true;
   } catch (error) {
-    console.error('Failed to send email notification:', error);
+    console.error('Failed to send email notification via AWS SES:', error);
     // Log detailed error information
     if (error.response) {
-      console.error('SendGrid API Error Response:', {
-        statusCode: error.response.statusCode || error.code, // Handle potential missing statusCode
-        body: error.response.body,
-        headers: error.response.headers
+      console.error('AWS SES Error Response:', {
+        statusCode: error.$metadata?.httpStatusCode,
+        message: error.message,
+        requestId: error.$metadata?.requestId
       });
     }
     return false;
