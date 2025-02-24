@@ -6,23 +6,12 @@ import { insertRepositorySchema } from "@shared/schema";
 import crypto from "crypto";
 import { sendToQueue, getRetryQueueStatus } from "./utils/sqs";
 import { formatMessage } from "./utils/message-templates";
-import { SQSClient, ReceiveMessageCommand, DeleteMessageCommand } from "@aws-sdk/client-sqs";
 
-// Initialize SQS client for webhook processing
-const sqsClient = new SQSClient({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
-// Add validation function for SQS messages
-function validateSQSMessage(body: any): boolean {
-  return body && 
-         typeof body.Message === 'string' && 
-         typeof body.MessageId === 'string' && 
-         typeof body.Timestamp === 'string';
+function verifyGithubWebhook(secret: string, signature: string | undefined, body: any): boolean {
+  if (!signature) return false;
+  const hmac = crypto.createHmac('sha256', secret);
+  const digest = 'sha256=' + hmac.update(JSON.stringify(body)).digest('hex');
+  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -201,82 +190,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendStatus(200);
   });
 
-  // Add new route to check message retry status
+  // Get retry queue status
   app.get("/api/message-retry-status", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(getRetryQueueStatus());
-  });
-
-  // Add new SQS webhook endpoint
-  app.post("/api/webhook/sqs", async (req, res) => {
-    console.log('Received SQS webhook:', req.body);
-
-    if (!validateSQSMessage(req.body)) {
-      console.error('Invalid SQS message format:', req.body);
-      return res.status(400).json({ error: 'Invalid message format' });
-    }
-
-    try {
-      const message = JSON.parse(req.body.Message);
-
-      // Process message based on event type
-      switch (message.event) {
-        case 'repository_added':
-        case 'push':
-        case 'pull_request':
-          // Update repository status if needed
-          if (message.repository?.id) {
-            const repository = await storage.getRepository(message.repository.id);
-            if (repository) {
-              console.log(`Processing ${message.event} event for repository ${repository.name}`);
-              // Additional processing logic can be added here
-            }
-          }
-          break;
-
-        default:
-          console.warn(`Unhandled event type: ${message.event}`);
-      }
-
-      // Acknowledge successful processing
-      res.status(200).json({
-        status: 'success',
-        messageId: req.body.MessageId,
-        event: message.event,
-        timestamp: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Error processing SQS webhook:', error);
-      res.status(500).json({ error: 'Failed to process message' });
-    }
-  });
-
-  // Add endpoint to manually poll messages (for testing)
-  app.get("/api/webhook/sqs/poll", async (req, res) => {
-    if (!req.isAuthenticated()) return res.sendStatus(401);
-
-    try {
-      const command = new ReceiveMessageCommand({
-        QueueUrl: process.env.AWS_QUEUE_URL,
-        MaxNumberOfMessages: 10,
-        WaitTimeSeconds: 0
-      });
-
-      const response = await sqsClient.send(command);
-      const messages = response.Messages || [];
-
-      res.json({
-        messageCount: messages.length,
-        messages: messages.map(msg => ({
-          id: msg.MessageId,
-          body: msg.Body ? JSON.parse(msg.Body) : null,
-          receivedAt: new Date().toISOString()
-        }))
-      });
-    } catch (error) {
-      console.error('Error polling SQS messages:', error);
-      res.status(500).json({ error: 'Failed to poll messages' });
-    }
   });
 
   const httpServer = createServer(app);
