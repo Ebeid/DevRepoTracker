@@ -58,17 +58,9 @@ export default function AddRepository() {
       toast({
         title: "Repository added",
         description: (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2">
-              <notificationStatus.icon className={`w-4 h-4 ${data.notification === 'queued' ? 'text-green-500' : 'text-yellow-500'}`} />
-              <span>{notificationStatus.message}</span>
-            </div>
-            {data.emailStatus === false && (
-              <div className="flex items-center gap-2 mt-1">
-                <AlertCircle className="w-4 h-4 text-yellow-500" />
-                <span>Email notification failed to send. Will retry with next event.</span>
-              </div>
-            )}
+          <div className="flex items-center gap-2">
+            <notificationStatus.icon className={`w-4 h-4 ${data.notification === 'queued' ? 'text-green-500' : 'text-yellow-500'}`} />
+            <span>{notificationStatus.message}</span>
           </div>
         ),
       });
