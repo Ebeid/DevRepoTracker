@@ -4,100 +4,131 @@ import type { Repository } from "@shared/schema";
 
 // Initialize SQS client
 const sqsClient = new SQSClient({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
+ region: process.env.AWS_REGION,
+ credentials: {
+   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+ },
 });
 
 interface QueueMessage {
-  event: string;
-  message: string;
-  timestamp: string;
-  repository: {
-    id: number;
-    name: string;
-    fullName: string;
-    url: string;
-  };
-  sender?: string;
-  action?: string;
+ event: string;
+ message: string;
+ timestamp: string;
+ repository: {
+   id: number;
+   name: string;
+   fullName: string;
+   url: string;
+   description?: string; //Adding description to handle it in the switch
+ };
+ sender?: string;
+ action?: string;
 }
 
 async function processMessage(message: QueueMessage, repository: Repository) {
-  console.log(`Processing ${message.event} event for repository ${repository.name}`);
-  
-  switch (message.event) {
-    case 'repository_added':
-      console.log('New repository added:', repository.name);
-      break;
-    
-    case 'push':
-      console.log('Push event received for:', repository.fullName);
-      break;
-    
-    case 'pull_request':
-      console.log('Pull request event:', message.action, 'by', message.sender);
-      break;
-    
-    default:
-      console.warn('Unhandled event type:', message.event);
-  }
+ console.log('Processing message:', {
+   event: message.event,
+   repository: {
+     id: repository.id,
+     name: repository.name,
+     fullName: repository.fullName,
+   },
+   messageContent: message,
+   timestamp: new Date().toISOString(),
+   sender: message.sender || 'system',
+   action: message.action
+ });
+
+ switch (message.event) {
+   case 'repository_added':
+     console.log('New repository added:', {
+       name: repository.name,
+       fullName: repository.fullName,
+       url: repository.url,
+       description: repository.description,
+       message: message.message
+     });
+     break;
+
+   case 'push':
+     console.log('Push event received:', {
+       repository: repository.fullName,
+       sender: message.sender,
+       message: message.message
+     });
+     break;
+
+   case 'pull_request':
+     console.log('Pull request event:', {
+       repository: repository.fullName,
+       action: message.action,
+       sender: message.sender,
+       message: message.message
+     });
+     break;
+
+   default:
+     console.warn('Unhandled event type:', {
+       type: message.event,
+       repositoryId: repository.id,
+       message: message.message
+     });
+ }
 }
 
 async function deleteMessage(receiptHandle: string) {
-  try {
-    await sqsClient.send(new DeleteMessageCommand({
-      QueueUrl: process.env.AWS_QUEUE_URL,
-      ReceiptHandle: receiptHandle
-    }));
-    console.log('Successfully deleted message');
-  } catch (error) {
-    console.error('Error deleting message:', error);
-  }
+ try {
+   await sqsClient.send(new DeleteMessageCommand({
+     QueueUrl: process.env.AWS_QUEUE_URL,
+     ReceiptHandle: receiptHandle
+   }));
+   console.log('Successfully deleted message');
+ } catch (error) {
+   console.error('Error deleting message:', error);
+ }
 }
 
 export async function startConsumer() {
-  console.log('Starting SQS consumer...');
-  
-  while (true) {
-    try {
-      const command = new ReceiveMessageCommand({
-        QueueUrl: process.env.AWS_QUEUE_URL,
-        MaxNumberOfMessages: 10,
-        WaitTimeSeconds: 20,
-        AttributeNames: ['All'],
-        MessageAttributeNames: ['All']
-      });
+ console.log('Starting SQS consumer...');
 
-      const response = await sqsClient.send(command);
-      const messages = response.Messages || [];
+ while (true) {
+   try {
+     const command = new ReceiveMessageCommand({
+       QueueUrl: process.env.AWS_QUEUE_URL,
+       MaxNumberOfMessages: 10,
+       WaitTimeSeconds: 20,
+       AttributeNames: ['All'],
+       MessageAttributeNames: ['All']
+     });
 
-      for (const msg of messages) {
-        try {
-          if (!msg.Body) continue;
-          
-          const messageData: QueueMessage = JSON.parse(msg.Body);
-          const repository = await storage.getRepository(messageData.repository.id);
-          
-          if (!repository) {
-            console.warn(`Repository ${messageData.repository.id} not found`);
-            continue;
-          }
+     const response = await sqsClient.send(command);
+     const messages = response.Messages || [];
 
-          await processMessage(messageData, repository);
-          await deleteMessage(msg.ReceiptHandle!);
-          
-        } catch (error) {
-          console.error('Error processing message:', error);
-          // Message will return to queue after visibility timeout
-        }
-      }
-    } catch (error) {
-      console.error('Error polling messages:', error);
-      // Wait before retrying on error
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-  }
+     for (const msg of messages) {
+       try {
+         if (!msg.Body) continue;
+
+         const messageData: QueueMessage = JSON.parse(msg.Body);
+         const repository = await storage.getRepository(messageData.repository.id);
+
+         if (!repository) {
+           console.warn(`Repository ${messageData.repository.id} not found`);
+           continue;
+         }
+
+         await processMessage(messageData, repository);
+         await deleteMessage(msg.ReceiptHandle!);
+
+       } catch (error) {
+         console.error('Error processing message:', error);
+         // Message will return to queue after visibility timeout
+       }
+     }
+   } catch (error) {
+     console.error('Error polling messages:', error);
+     // Wait before retrying on error
+     await new Promise(resolve => setTimeout(resolve, 5000));
+   }
+ }
 }
