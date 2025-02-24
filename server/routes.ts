@@ -6,6 +6,7 @@ import { insertRepositorySchema } from "@shared/schema";
 import crypto from "crypto";
 import { sendToQueue, getRetryQueueStatus } from "./utils/sqs";
 import { formatMessage } from "./utils/message-templates";
+import { sendEmailNotification } from "./utils/email-service";
 
 function verifyGithubWebhook(secret: string, signature: string | undefined, body: any): boolean {
   if (!signature) return false;
@@ -74,6 +75,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: req.user.username,
         },
       });
+
+      // Send email notification
+      await sendEmailNotification(messageText, repository, 'repository_added');
+
       console.log(`Successfully sent message to SQS for repository: ${repository.name}`);
     } catch (error) {
       // Log the error but don't fail the request
@@ -160,7 +165,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payload: JSON.stringify(req.body),
       });
 
-      // Send templated message to SQS
+      // Send templated message to SQS and email
       try {
         const messageText = formatMessage(event as any, {
           repository,
@@ -181,6 +186,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           sender: req.body.sender.login,
           action: event === 'pull_request' ? req.body.action : undefined
         });
+
+        // Send email notification
+        await sendEmailNotification(messageText, repository, event);
       } catch (error) {
         console.error(`Failed to send templated message to SQS for ${event} event:`, error);
       }
