@@ -18,7 +18,7 @@ export async function sendEmailNotification(
   try {
     const emailContent = {
       to: NOTIFICATION_EMAIL,
-      from: 'repository-manager@noreply.com', // Replace with your verified sender
+      from: 'esoliman@gmail.com', // Use the same email as recipient for initial testing.  Change to verified sender in production.
       subject: `Repository Event: ${eventType}`,
       text: messageText,
       html: `
@@ -40,6 +40,14 @@ export async function sendEmailNotification(
     return true;
   } catch (error) {
     console.error('Failed to send email notification:', error);
+    // Log detailed error information
+    if (error.response) {
+      console.error('SendGrid API Error Response:', {
+        statusCode: error.response.statusCode || error.code, // Handle potential missing statusCode
+        body: error.response.body,
+        headers: error.response.headers
+      });
+    }
     return false;
   }
 }
