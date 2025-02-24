@@ -50,6 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     // Send message to SQS queue about the new repository
     let sqsError = null;
+    let emailStatus = null;
     try {
       const messageText = formatMessage('repository_added', {
         repository,
@@ -77,7 +78,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Send email notification
-      await sendEmailNotification(messageText, repository, 'repository_added');
+      emailStatus = await sendEmailNotification(messageText, repository, 'repository_added');
 
       console.log(`Successfully sent message to SQS for repository: ${repository.name}`);
     } catch (error) {
@@ -93,6 +94,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(201).json({
       ...repository,
       notification: sqsError ? 'queued_with_errors' : 'queued',
+      emailStatus,
       retryStatus: retryStatus ? {
         inRetryQueue: true,
         queueSize: retryStatus.queueSize,
