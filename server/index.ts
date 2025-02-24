@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { startConsumer } from "./workers/sqs-consumer";
 
 const app = express();
 app.use(express.json());
@@ -46,6 +47,17 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
+  // Start SQS consumer
+  try {
+    startConsumer().catch(error => {
+      console.error('Error in SQS consumer:', error);
+      // Consumer will automatically retry on error
+    });
+    console.log('SQS consumer started successfully');
+  } catch (error) {
+    console.error('Failed to start SQS consumer:', error);
+  }
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
