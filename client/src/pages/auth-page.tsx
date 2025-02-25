@@ -41,7 +41,7 @@ export default function AuthPage() {
           <CardHeader>
             <div className="flex items-center gap-2 mb-2">
               <SiGithub className="w-8 h-8" />
-              <CardTitle className="text-2xl">Repository Manager</CardTitle>
+              <CardTitle className="text-2xl">Git-Plus</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
@@ -199,11 +199,11 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
         <div className="max-w-xl text-primary-foreground">
           <h1 className="text-4xl font-bold mb-4">
-            Manage Your GitHub Repositories
+            Git-Plus: Advanced GitHub Management
           </h1>
           <p className="text-lg opacity-90">
-            A simple and efficient way to organize and track your GitHub repositories.
-            Register now to start managing your projects in one place.
+            A powerful platform for managing and tracking your GitHub repositories with advanced features.
+            Get started now to enhance your GitHub workflow.
           </p>
         </div>
       </div>

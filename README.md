@@ -1,4 +1,4 @@
-# GitHub Repository Manager
+# Git-Plus
 
 A comprehensive developer platform for managing and tracking GitHub repositories with advanced automated scanning and webhook integration capabilities.
 
