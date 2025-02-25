@@ -199,7 +199,7 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
         <div className="max-w-xl text-primary-foreground">
           <h1 className="text-4xl font-bold mb-4">
-            Your Git Repositories Insights
+            Git-Plus is not another Git service
           </h1>
           <p className="text-lg opacity-90">
             Your code repositories are more than code files. Register now to work with your respository as you never before.
