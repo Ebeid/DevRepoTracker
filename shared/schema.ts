@@ -8,6 +8,33 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
+export const insertUserSchema = createInsertSchema(users)
+  .pick({
+    username: true,
+    password: true,
+  })
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
+  .transform((data) => ({
+    ...data,
+    username: data.username.toLowerCase(), // Normalize email to lowercase
+  }))
+  .refine(
+    (data) => {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return emailRegex.test(data.username);
+    },
+    {
+      message: "Username must be a valid email address",
+      path: ["username"],
+    }
+  );
+
 export const repositories = pgTable("repositories", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
@@ -38,19 +65,6 @@ export const webhookEvents = pgTable("webhook_events", {
   payload: text("payload").notNull(), // JSON stringified data
   createdAt: timestamp("created_at").defaultNow(),
 });
-
-export const insertUserSchema = createInsertSchema(users)
-  .pick({
-    username: true,
-    password: true,
-  })
-  .extend({
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
 
 export const insertRepositorySchema = createInsertSchema(repositories).pick({
   name: true,
