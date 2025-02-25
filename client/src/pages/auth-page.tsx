@@ -199,7 +199,7 @@ export default function AuthPage() {
       <div className="hidden lg:flex flex-1 bg-primary items-center justify-center p-8">
         <div className="max-w-xl text-primary-foreground">
           <h1 className="text-4xl font-bold mb-4">
-            Git-Plus: Advanced GitHub Management
+            Your Git Repositories Insights
           </h1>
           <p className="text-lg opacity-90">
             A powerful platform for managing and tracking your GitHub repositories with advanced features.
