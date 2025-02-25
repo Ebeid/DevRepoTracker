@@ -60,9 +60,18 @@ export default function AuthPage() {
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel className="flex gap-1">
+                              Email
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input 
+                                {...field} 
+                                type="email" 
+                                required 
+                                placeholder="Enter your email"
+                                className="focus-visible:ring-2 ring-offset-2 ring-primary"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -73,9 +82,18 @@ export default function AuthPage() {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel className="flex gap-1">
+                              Password
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input type="password" {...field} />
+                              <Input 
+                                type="password" 
+                                {...field} 
+                                required
+                                placeholder="Enter your password"
+                                className="focus-visible:ring-2 ring-offset-2 ring-primary"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -102,9 +120,18 @@ export default function AuthPage() {
                         name="username"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel className="flex gap-1">
+                              Email
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input 
+                                {...field} 
+                                type="email" 
+                                required
+                                placeholder="Enter your email"
+                                className="focus-visible:ring-2 ring-offset-2 ring-primary"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -115,9 +142,18 @@ export default function AuthPage() {
                         name="password"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel className="flex gap-1">
+                              Password
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input type="password" {...field} />
+                              <Input 
+                                type="password" 
+                                {...field} 
+                                required
+                                placeholder="Choose a password"
+                                className="focus-visible:ring-2 ring-offset-2 ring-primary"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -128,9 +164,18 @@ export default function AuthPage() {
                         name="confirmPassword"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Confirm Password</FormLabel>
+                            <FormLabel className="flex gap-1">
+                              Confirm Password
+                              <span className="text-destructive">*</span>
+                            </FormLabel>
                             <FormControl>
-                              <Input type="password" {...field} />
+                              <Input 
+                                type="password" 
+                                {...field} 
+                                required
+                                placeholder="Confirm your password"
+                                className="focus-visible:ring-2 ring-offset-2 ring-primary"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
