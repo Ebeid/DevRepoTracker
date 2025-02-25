@@ -202,8 +202,7 @@ export default function AuthPage() {
             Your Git Repositories Insights
           </h1>
           <p className="text-lg opacity-90">
-            A powerful platform for managing and tracking your GitHub repositories with advanced features.
-            Get started now to enhance your GitHub workflow.
+            Your code repositories are more than code files. Register now to work with your respository as you never before.
           </p>
         </div>
       </div>
