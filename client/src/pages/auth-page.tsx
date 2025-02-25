@@ -12,7 +12,7 @@ import { SiGithub } from "react-icons/si";
 
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
-  
+
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
     defaultValues: {
@@ -26,6 +26,7 @@ export default function AuthPage() {
     defaultValues: {
       username: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
@@ -115,6 +116,19 @@ export default function AuthPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
                             <FormControl>
                               <Input type="password" {...field} />
                             </FormControl>
