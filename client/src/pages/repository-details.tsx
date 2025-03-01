@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RepositoryAnalytics from "@/components/repository-analytics";
 import RepositoryHealthScore from "@/components/repository-health-score";
+import RepositoryCodeSearch from "@/components/repository-code-search";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -70,6 +71,12 @@ export default function RepositoryDetailsPage() {
           <p className="text-muted-foreground mt-2">{repository.fullName}</p>
           <p className="mt-4">{repository.description || "No description provided"}</p>
         </div>
+
+        {/* Repository Code Search - Add at the top for prominence */}
+        <RepositoryCodeSearch 
+          repositoryId={repository.id} 
+          repositoryName={repository.name} 
+        />
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* Health Score Card - Prominently placed at the top */}
