@@ -23,7 +23,8 @@ import {
   Copy, 
   ChevronRight,
   Star,
-  GitFork 
+  GitFork,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -129,6 +130,16 @@ export default function RepositoryWebhook({ repositoryId, fullName }: Repository
         return "text-purple-500";
       default:
         return "text-gray-500";
+    }
+  };
+
+  // Helper function to format date safely
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Unknown date";
+    try {
+      return format(new Date(dateString), "PPp");
+    } catch (error) {
+      return "Invalid date";
     }
   };
 
@@ -254,7 +265,7 @@ export default function RepositoryWebhook({ repositoryId, fullName }: Repository
                         </p>
                         <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                           <Clock className="w-3 h-3" />
-                          {format(new Date(event.createdAt), "PPp")}
+                          {formatDate(event.createdAt)}
                         </div>
                       </div>
                     </motion.div>
