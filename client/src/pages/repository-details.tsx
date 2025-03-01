@@ -10,6 +10,7 @@ import RepositoryCodeSearch from "@/components/repository-code-search";
 import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
 import RepositoryWebhook from "@/components/repository-webhook";
 import DeveloperCollaborationNetwork from "@/components/developer-collaboration-network";
+import CodeComplexityHeatmap from "@/components/code-complexity-heatmap";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -111,6 +112,14 @@ export default function RepositoryDetailsPage() {
         {/* Developer Collaboration Network */}
         <div className="mt-6">
           <DeveloperCollaborationNetwork
+            repositoryId={repository.id}
+            repositoryName={repository.name}
+          />
+        </div>
+
+        {/* Code Complexity Heatmap */}
+        <div className="mt-6">
+          <CodeComplexityHeatmap
             repositoryId={repository.id}
             repositoryName={repository.name}
           />
