@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RepositoryAnalytics from "@/components/repository-analytics";
 import RepositoryHealthScore from "@/components/repository-health-score";
 import RepositoryCodeSearch from "@/components/repository-code-search";
+import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -95,6 +96,14 @@ export default function RepositoryDetailsPage() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Team Productivity Heatmap */}
+        <div className="mt-6">
+          <TeamProductivityHeatmap 
+            repositoryId={repository.id} 
+            repositoryName={repository.name} 
+          />
         </div>
       </div>
     </div>
