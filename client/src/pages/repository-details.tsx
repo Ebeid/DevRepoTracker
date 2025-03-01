@@ -8,6 +8,7 @@ import RepositoryAnalytics from "@/components/repository-analytics";
 import RepositoryHealthScore from "@/components/repository-health-score";
 import RepositoryCodeSearch from "@/components/repository-code-search";
 import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
+import RepositoryWebhook from "@/components/repository-webhook";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -104,6 +105,21 @@ export default function RepositoryDetailsPage() {
             repositoryId={repository.id} 
             repositoryName={repository.name} 
           />
+        </div>
+
+        {/* Repository Webhook Integration */}
+        <div className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Webhook Integration</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RepositoryWebhook 
+                repositoryId={repository.id}
+                fullName={repository.fullName} 
+              />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
