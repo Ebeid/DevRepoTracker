@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -370,7 +370,7 @@ const generateMockCodeStructure = () => {
       }
     ]
   };
-  
+
   return mockStructure;
 };
 
@@ -393,9 +393,9 @@ const getComplexityRating = (complexity: number) => {
 };
 
 // Flatten tree structure for heatmap view
-const flattenTree = (node, path = "", result = []) => {
+const flattenTree = (node: any, path = "", result: any[] = []) => {
   const currentPath = path ? `${path}/${node.name}` : node.name;
-  
+
   if (node.type === "file") {
     result.push({
       id: currentPath,
@@ -410,13 +410,13 @@ const flattenTree = (node, path = "", result = []) => {
       language: node.language
     });
   } else if (node.children) {
-    node.children.forEach(child => flattenTree(child, currentPath, result));
+    node.children.forEach((child: any) => flattenTree(child, currentPath, result));
   }
-  
+
   return result;
 };
 
-export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: CodeComplexityHeatmapProps) {
+const CodeComplexityHeatmap: React.FC<CodeComplexityHeatmapProps> = ({ repositoryId, repositoryName }) => {
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState("heatmap");
   const [selectedPath, setSelectedPath] = useState("");
@@ -425,24 +425,26 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
   const [searchQuery, setSearchQuery] = useState("");
   const [treeVisible, setTreeVisible] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState("complexity");
-  const [codeData, setCodeData] = useState(null);
+  const [codeData, setCodeData] = useState<any>(null);
   const { toast } = useToast();
 
   // Load data
   useEffect(() => {
     setLoading(true);
-    
+
     // Simulate API call delay
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       const data = generateMockCodeStructure();
       setCodeData(data);
       setLoading(false);
-      
+
       toast({
         title: "Code complexity analysis complete",
         description: `Analyzed repository: ${repositoryName}`,
       });
     }, 1500);
+
+    return () => clearTimeout(timer);
   }, [repositoryName, toast]);
 
   // Flatten data for heatmap view
@@ -454,18 +456,18 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
   // Filter data based on current filters
   const filteredData = useMemo(() => {
     if (!flatData.length) return [];
-    
-    return flatData.filter(item => {
+
+    return flatData.filter((item: any) => {
       // Apply complexity filter
       if (item.complexity < filterComplexity[0] || item.complexity > filterComplexity[1]) {
         return false;
       }
-      
+
       // Apply search filter
       if (searchQuery && !item.path.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
-      
+
       return true;
     });
   }, [flatData, filterComplexity, searchQuery]);
@@ -473,11 +475,11 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
   // Get complexity statistics
   const stats = useMemo(() => {
     if (!flatData.length) return { avg: 0, max: 0, total: 0, high: 0 };
-    
-    const avg = flatData.reduce((sum, item) => sum + item.complexity, 0) / flatData.length;
-    const max = Math.max(...flatData.map(item => item.complexity));
-    const highComplexity = flatData.filter(item => item.complexity > 20).length;
-    
+
+    const avg = flatData.reduce((sum: number, item: any) => sum + item.complexity, 0) / flatData.length;
+    const max = Math.max(...flatData.map((item: any) => item.complexity));
+    const highComplexity = flatData.filter((item: any) => item.complexity > 20).length;
+
     return {
       avg: parseFloat(avg.toFixed(1)),
       max,
@@ -496,23 +498,23 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
   };
 
   // Recursive function to render the tree view
-  const renderTree = (node, currentPath = "", depth = 0) => {
+  const renderTree = (node: any, currentPath = "", depth = 0) => {
     const path = currentPath ? `${currentPath}/${node.name}` : node.name;
     const isExpanded = expandedFolders.includes(path);
     const isSelected = selectedPath === path;
-    
+
     // Skip items that don't match search
     if (searchQuery && !path.toLowerCase().includes(searchQuery.toLowerCase()) && node.type === "file") {
       return null;
     }
-    
+
     // For file nodes
     if (node.type === "file") {
       // Skip files outside complexity filter
       if (node.complexity < filterComplexity[0] || node.complexity > filterComplexity[1]) {
         return null;
       }
-      
+
       return (
         <motion.div
           key={path}
@@ -539,26 +541,26 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
         </motion.div>
       );
     }
-    
+
     // For directory nodes
     if (node.type === "directory") {
       // Check if any children match the filter criteria
       let hasMatchingChildren = false;
       if (node.children) {
-        hasMatchingChildren = node.children.some(child => {
+        hasMatchingChildren = node.children.some((child: any) => {
           if (child.type === "file") {
             return (child.complexity >= filterComplexity[0] && 
                    child.complexity <= filterComplexity[1] &&
                    (!searchQuery || child.name.toLowerCase().includes(searchQuery.toLowerCase())));
           } else {
             // Recursively check directories
-            const checkDir = (dir) => {
+            const checkDir = (dir: any) => {
               if (dir.type === "file") {
                 return (dir.complexity >= filterComplexity[0] && 
                        dir.complexity <= filterComplexity[1] &&
                        (!searchQuery || dir.name.toLowerCase().includes(searchQuery.toLowerCase())));
               } else if (dir.children) {
-                return dir.children.some(c => checkDir(c));
+                return dir.children.some((c: any) => checkDir(c));
               }
               return false;
             };
@@ -566,12 +568,12 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
           }
         });
       }
-      
+
       // Skip directories with no matching children
       if (!hasMatchingChildren && searchQuery) {
         return null;
       }
-      
+
       return (
         <div key={path}>
           <motion.div
@@ -589,26 +591,26 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             <Folder size={16} className="mr-2 flex-shrink-0" />
             <span className="text-sm font-medium">{node.name}</span>
           </motion.div>
-          
+
           {isExpanded && node.children && (
             <div>
-              {node.children.map(child => renderTree(child, path, depth + 1))}
+              {node.children.map((child: any) => renderTree(child, path, depth + 1))}
             </div>
           )}
         </div>
       );
     }
-    
+
     return null;
   };
 
   // Render heatmap cell
-  const renderHeatmapCell = (file) => {
+  const renderHeatmapCell = (file: any) => {
     const size = Math.max(30, Math.min(100, 30 + (file.complexity * 2)));
     const metric = selectedMetric === "complexity" ? file.complexity : 
                   selectedMetric === "lines" ? file.lines :
                   selectedMetric === "issues" ? file.issues : file.dependencies;
-    
+
     // Adjust color based on selected metric
     const getColor = () => {
       if (selectedMetric === "complexity") return calculateComplexityColor(file.complexity);
@@ -633,10 +635,10 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
       if (file.dependencies < 10) return "#f97316";
       return "#ef4444";
     };
-    
+
     const color = getColor();
     const fileName = file.name.split('/').pop();
-    
+
     return (
       <TooltipProvider key={file.id}>
         <Tooltip delayDuration={300}>
@@ -658,7 +660,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
               <span className="text-xs font-medium truncate max-w-[80%] text-center">
                 {fileName}
               </span>
-              
+
               {file.issues > 0 && (
                 <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
                   {file.issues}
@@ -698,10 +700,10 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
         </div>
       );
     }
-    
-    const file = flatData.find(f => f.path === selectedPath);
+
+    const file = flatData.find((f: any) => f.path === selectedPath);
     if (!file) return null;
-    
+
     // Get code snippets with high complexity (mock data)
     const complexSnippets = [
       {
@@ -720,10 +722,10 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
         complexity: Math.round(file.complexity * 0.5)
       }
     ];
-    
+
     // Filter snippets based on file complexity
     const snippets = complexSnippets.filter(s => s.complexity <= file.complexity);
-    
+
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -734,7 +736,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             </h3>
             <p className="text-sm text-muted-foreground">{file.path}</p>
           </div>
-          
+
           <Badge 
             variant="outline" 
             className="font-medium"
@@ -747,7 +749,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             {getComplexityRating(file.complexity)} Complexity
           </Badge>
         </div>
-        
+
         <div className="grid grid-cols-4 gap-4">
           <div className="p-3 rounded-lg border">
             <div className="text-sm text-muted-foreground">Complexity</div>
@@ -768,7 +770,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             <div className="text-2xl font-bold">{file.dependencies}</div>
           </div>
         </div>
-        
+
         {file.issues > 0 && (
           <div className="p-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/20">
             <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
@@ -780,7 +782,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             </p>
           </div>
         )}
-        
+
         {snippets.length > 0 && (
           <div className="space-y-2">
             <h4 className="font-medium text-sm flex items-center gap-1">
@@ -804,7 +806,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             </div>
           </div>
         )}
-        
+
         <div className="mt-2">
           <h4 className="font-medium text-sm mb-1">Recommendations</h4>
           <ul className="text-sm space-y-1">
@@ -843,7 +845,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
       </div>
     );
   };
-  
+
   // Export complexity data
   const handleExport = () => {
     toast({
@@ -865,7 +867,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
               Visualize code complexity patterns across {repositoryName}
             </CardDescription>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Button 
               variant="outline" 
@@ -878,7 +880,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent>
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
@@ -892,8 +894,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
             <p className="text-muted-foreground">Analyzing code complexity...</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            <div className="grid grid-cols-4 gap-4">
+          <div className="space-y-4"><div className="grid grid-cols-4 gap-4">
               <div className="p-3 rounded-lg border">
                 <div className="text-sm text-muted-foreground">Avg. Complexity</div>
                 <div className="text-2xl font-bold">{stats.avg}</div>
@@ -911,7 +912,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
                 <div className="text-2xl font-bold">{stats.high}</div>
               </div>
             </div>
-            
+
             <div className="border-t border-b py-3 flex flex-wrap gap-2 items-center justify-between">
               <Tabs value={activeView} onValueChange={setActiveView} className="w-auto">
                 <TabsList>
@@ -919,7 +920,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
                   <TabsTrigger value="treeview">Tree View</TabsTrigger>
                 </TabsList>
               </Tabs>
-              
+
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center">
                   <Button 
@@ -941,7 +942,7 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
                     )}
                   </Button>
                 </div>
-                
+
                 {activeView === "heatmap" && (
                   <div className="flex items-center gap-2">
                     <span className="text-sm">Metric:</span>
@@ -951,94 +952,103 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="complexity">Complexity</SelectItem>
-                        <SelectItem value="lines">Line Count</SelectItem>
+                        <SelectItem value="lines">Lines of Code</SelectItem>
                         <SelectItem value="issues">Issues</SelectItem>
                         <SelectItem value="dependencies">Dependencies</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
-                
-                <div className="relative">
-                  <div className="flex items-center border rounded-md h-8 w-[200px] px-3">
-                    <Search className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <input
-                      type="text"
-                      placeholder="Search files..."
-                      className="border-0 focus:ring-0 focus:outline-none w-full h-full p-0 text-sm"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+
+                <div className="flex items-center gap-2">
+                  <span className="text-sm whitespace-nowrap">Complexity Range:</span>
+                  <div className="w-[140px]">
+                    <Slider
+                      value={filterComplexity}
+                      min={0}
+                      max={40}
+                      step={1}
+                      onValueChange={setFilterComplexity}
                     />
                   </div>
+                  <span className="text-xs">
+                    {filterComplexity[0]}-{filterComplexity[1]}
+                  </span>
                 </div>
               </div>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-sm">Complexity Filter:</span>
-              <div className="w-[200px]">
-                <Slider
-                  value={filterComplexity}
-                  min={0}
-                  max={40}
-                  step={1}
-                  onValueChange={setFilterComplexity}
+
+            <div className="flex items-center gap-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="Search files..."
+                  className="h-8 w-full rounded-md border pl-8 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <span className="text-xs text-muted-foreground">{filterComplexity[0]} - {filterComplexity[1]}</span>
-              
-              <div className="ml-auto flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">Complexity scale:</span>
-                <div className="flex items-center">
-                  {["#10b981", "#a3e635", "#facc15", "#f97316", "#ef4444"].map((color, i) => (
-                    <div
-                      key={i}
-                      className="w-4 h-4"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground ml-1">Low to High</span>
-              </div>
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery("")}
+                >
+                  Clear
+                </Button>
+              )}
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 min-h-[500px]">
+
+            <div className="grid gap-4" style={{ gridTemplateColumns: treeVisible ? "250px 1fr" : "1fr" }}>
+              {/* File tree */}
               {treeVisible && (
-                <div className="col-span-1 border rounded-lg p-3 overflow-y-auto max-h-[500px]">
-                  <div className="text-sm font-medium mb-2 flex items-center justify-between">
-                    <span>Repository Structure</span>
-                    <Badge variant="outline" className="text-xs">
-                      {filteredData.length} files
-                    </Badge>
+                <div className="border rounded-lg p-2 overflow-auto h-[500px]">
+                  <div className="py-2">
+                    <h3 className="text-sm font-medium flex items-center gap-1 mb-2">
+                      <FolderTree className="h-4 w-4" />
+                      Repository Structure
+                    </h3>
+                    {renderTree(codeData)}
                   </div>
-                  {codeData && renderTree(codeData)}
                 </div>
               )}
-              
-              <div className={`col-span-1 ${treeVisible ? 'md:col-span-2' : 'md:col-span-3'} border rounded-lg p-3 min-h-[500px] overflow-auto`}>
-                {activeView === "heatmap" ? (
-                  <div>
-                    <div className="text-sm font-medium mb-2">
-                      Complexity Heat Map ({selectedMetric})
+
+              {/* Main content area */}
+              <div className="border rounded-lg p-4 h-[500px] overflow-auto">
+                <TabsContent value="heatmap" className="m-0 h-full">
+                  {!filteredData.length ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center">
+                      <AlertTriangle className="h-10 w-10 text-muted-foreground/50 mb-4" />
+                      <h3 className="text-lg font-medium">No Matching Files</h3>
+                      <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                        {searchQuery ? (
+                          <>
+                            No files found matching <span className="font-medium">"{searchQuery}"</span> within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
+                          </>
+                        ) : (
+                          <>
+                            No files found within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
+                          </>
+                        )}
+                      </p>
+                      <Button variant="outline" size="sm" className="mt-4" onClick={() => {
+                        setFilterComplexity([0, 40]);
+                        setSearchQuery("");
+                      }}>
+                        Reset Filters
+                      </Button>
                     </div>
-                    <div className="flex flex-wrap gap-3 p-2">
-                      {filteredData.length === 0 ? (
-                        <div className="flex items-center justify-center w-full h-64 text-muted-foreground">
-                          <div className="text-center">
-                            <Filter className="h-12 w-12 mx-auto mb-2 text-muted-foreground/50" />
-                            <p>No files match the current filters</p>
-                          </div>
-                        </div>
-                      ) : (
-                        filteredData.map(file => renderHeatmapCell(file))
-                      )}
+                  ) : (
+                    <div className="flex flex-wrap gap-3 content-start">
+                      {filteredData.map((file) => renderHeatmapCell(file))}
                     </div>
-                  </div>
-                ) : (
-                  <div className="p-3">
-                    {renderFileDetail()}
-                  </div>
-                )}
+                  )}
+                </TabsContent>
+
+                <TabsContent value="treeview" className="m-0 h-full">
+                  {renderFileDetail()}
+                </TabsContent>
               </div>
             </div>
           </div>
@@ -1046,4 +1056,6 @@ export default function CodeComplexityHeatmap({ repositoryId, repositoryName }: 
       </CardContent>
     </Card>
   );
-}
+};
+
+export default CodeComplexityHeatmap;
