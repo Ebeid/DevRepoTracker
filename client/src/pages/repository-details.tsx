@@ -5,6 +5,7 @@ import { Loader2, ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import RepositoryAnalytics from "@/components/repository-analytics";
+import RepositoryHealthScore from "@/components/repository-health-score";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -70,15 +71,23 @@ export default function RepositoryDetailsPage() {
           <p className="mt-4">{repository.description || "No description provided"}</p>
         </div>
 
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Repository Analytics</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RepositoryAnalytics repository={repository} />
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Health Score Card - Prominently placed at the top */}
+          <div>
+            <RepositoryHealthScore repository={repository} />
+          </div>
+
+          {/* Analytics Card */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Repository Analytics</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RepositoryAnalytics repository={repository} />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
