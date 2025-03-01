@@ -9,6 +9,7 @@ import RepositoryHealthScore from "@/components/repository-health-score";
 import RepositoryCodeSearch from "@/components/repository-code-search";
 import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
 import RepositoryWebhook from "@/components/repository-webhook";
+import DeveloperCollaborationNetwork from "@/components/developer-collaboration-network";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
@@ -104,6 +105,14 @@ export default function RepositoryDetailsPage() {
           <TeamProductivityHeatmap 
             repositoryId={repository.id} 
             repositoryName={repository.name} 
+          />
+        </div>
+
+        {/* Developer Collaboration Network */}
+        <div className="mt-6">
+          <DeveloperCollaborationNetwork
+            repositoryId={repository.id}
+            repositoryName={repository.name}
           />
         </div>
 
