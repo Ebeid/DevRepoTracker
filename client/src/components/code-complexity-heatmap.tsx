@@ -894,7 +894,8 @@ const CodeComplexityHeatmap: React.FC<CodeComplexityHeatmapProps> = ({ repositor
             <p className="text-muted-foreground">Analyzing code complexity...</p>
           </div>
         ) : (
-          <div className="space-y-4"><div className="grid grid-cols-4 gap-4">
+          <div className="space-y-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="p-3 rounded-lg border">
                 <div className="text-sm text-muted-foreground">Avg. Complexity</div>
                 <div className="text-2xl font-bold">{stats.avg}</div>
@@ -1016,39 +1017,40 @@ const CodeComplexityHeatmap: React.FC<CodeComplexityHeatmapProps> = ({ repositor
 
               {/* Main content area */}
               <div className="border rounded-lg p-4 h-[500px] overflow-auto">
-                <TabsContent value="heatmap" className="m-0 h-full">
-                  {!filteredData.length ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center">
-                      <AlertTriangle className="h-10 w-10 text-muted-foreground/50 mb-4" />
-                      <h3 className="text-lg font-medium">No Matching Files</h3>
-                      <p className="text-sm text-muted-foreground mt-2 max-w-md">
-                        {searchQuery ? (
-                          <>
-                            No files found matching <span className="font-medium">"{searchQuery}"</span> within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
-                          </>
-                        ) : (
-                          <>
-                            No files found within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
-                          </>
-                        )}
-                      </p>
-                      <Button variant="outline" size="sm" className="mt-4" onClick={() => {
-                        setFilterComplexity([0, 40]);
-                        setSearchQuery("");
-                      }}>
-                        Reset Filters
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-3 content-start">
-                      {filteredData.map((file) => renderHeatmapCell(file))}
-                    </div>
-                  )}
-                </TabsContent>
-
-                <TabsContent value="treeview" className="m-0 h-full">
-                  {renderFileDetail()}
-                </TabsContent>
+                <Tabs value={activeView}>
+                  <TabsContent value="heatmap" className="m-0 h-full">
+                    {!filteredData.length ? (
+                      <div className="h-full flex flex-col items-center justify-center text-center">
+                        <AlertTriangle className="h-10 w-10 text-muted-foreground/50 mb-4" />
+                        <h3 className="text-lg font-medium">No Matching Files</h3>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-md">
+                          {searchQuery ? (
+                            <>
+                              No files found matching <span className="font-medium">"{searchQuery}"</span> within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
+                            </>
+                          ) : (
+                            <>
+                              No files found within complexity range {filterComplexity[0]}-{filterComplexity[1]}.
+                            </>
+                          )}
+                        </p>
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => {
+                          setFilterComplexity([0, 40]);
+                          setSearchQuery("");
+                        }}>
+                          Reset Filters
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-3 content-start">
+                        {filteredData.map((file) => renderHeatmapCell(file))}
+                      </div>
+                    )}
+                  </TabsContent>
+                  <TabsContent value="treeview" className="m-0 h-full">
+                    {renderFileDetail()}
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
           </div>
