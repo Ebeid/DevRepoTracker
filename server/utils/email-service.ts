@@ -26,7 +26,10 @@ export async function sendPasswordResetEmail(
   username: string
 ): Promise<boolean> {
   try {
-    const resetUrl = `${process.env.APP_URL || window?.location?.origin || 'http://localhost:5000'}/auth/reset-password?token=${resetToken}`;
+    // Use APP_URL environment variable or fallback to a default URL
+    // Remove the window.location reference which doesn't exist on the server
+    const baseUrl = process.env.APP_URL || 'http://localhost:5000';
+    const resetUrl = `${baseUrl}/auth/reset-password?token=${resetToken}`;
 
     const msg = {
       to,
