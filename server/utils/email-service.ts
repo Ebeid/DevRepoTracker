@@ -16,8 +16,10 @@ const sesClient = new SESClient({
   },
 });
 
-const NOTIFICATION_EMAIL = 'esoliman@gmail.com';
-const FROM_EMAIL = 'notifications@git-plus.com';
+// Use environment variables for email addresses or fallback to defaults
+// Make sure to verify these email addresses in AWS SES console
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL || 'no-reply@example.com';
+const FROM_EMAIL = process.env.FROM_EMAIL || NOTIFICATION_EMAIL;
 
 // Function to send password reset emails using AWS SES
 export async function sendPasswordResetEmail(
@@ -49,6 +51,9 @@ export async function sendPasswordResetEmail(
 
     // Plain text content as a fallback
     const textBody = `Hello ${username},\n\nYou requested to reset your password. Click the link below to reset your password:\n\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nRegards,\nGit-Plus Team`;
+
+    // Log email configuration for debugging
+    console.log(`Attempting to send password reset email from ${NOTIFICATION_EMAIL} to ${to} using AWS SES in ${process.env.AWS_REGION} region`);
 
     // Create and send the email command
     const command = new SendEmailCommand({
