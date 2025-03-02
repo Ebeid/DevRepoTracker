@@ -66,6 +66,16 @@ export const webhookEvents = pgTable("webhook_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Password reset tokens
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+  used: boolean("used").default(false),
+});
+
 export const insertRepositorySchema = createInsertSchema(repositories).pick({
   name: true,
   fullName: true,
@@ -83,9 +93,24 @@ export const insertWebhookEventSchema = createInsertSchema(webhookEvents).pick({
   payload: true,
 });
 
+// Reset password schema
+export const resetPasswordRequestSchema = z.object({
+  username: z.string().email("Invalid email address"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string(),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Repository = typeof repositories.$inferSelect;
 export type InsertRepository = z.infer<typeof insertRepositorySchema>;
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

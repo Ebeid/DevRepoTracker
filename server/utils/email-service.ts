@@ -1,7 +1,13 @@
+import sgMail from '@sendgrid/mail';
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
 import { Repository } from "@shared/schema";
 
-// Initialize SES client
+// Set up SendGrid with the API key
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
+
+// Initialize SES client (keeping for backward compatibility)
 const sesClient = new SESClient({
   region: process.env.AWS_REGION,
   credentials: {
@@ -11,6 +17,53 @@ const sesClient = new SESClient({
 });
 
 const NOTIFICATION_EMAIL = 'esoliman@gmail.com';
+const FROM_EMAIL = 'notifications@git-plus.com';
+
+// Function to send password reset emails using SendGrid
+export async function sendPasswordResetEmail(
+  to: string,
+  resetToken: string,
+  username: string
+): Promise<boolean> {
+  try {
+    const resetUrl = `${process.env.APP_URL || window?.location?.origin || 'http://localhost:5000'}/auth/reset-password?token=${resetToken}`;
+
+    const msg = {
+      to,
+      from: FROM_EMAIL,
+      subject: 'Git-Plus Password Reset',
+      text: `Hello ${username},\n\nYou requested to reset your password. Click the link below to reset your password:\n\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nRegards,\nGit-Plus Team`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #333;">Git-Plus Password Reset</h2>
+          <p>Hello ${username},</p>
+          <p>You requested to reset your password. Click the button below to reset your password:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #4F46E5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">Reset Your Password</a>
+          </div>
+          <p><strong>This link will expire in 1 hour.</strong></p>
+          <p>If you didn't request this, please ignore this email.</p>
+          <p>Regards,<br/>Git-Plus Team</p>
+          <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="color: #888; font-size: 12px;">If the button doesn't work, copy and paste this URL into your browser: ${resetUrl}</p>
+        </div>
+      `
+    };
+
+    await sgMail.send(msg);
+    console.log('Password reset email sent successfully via SendGrid');
+    return true;
+  } catch (error: any) {
+    console.error('Failed to send password reset email via SendGrid:', error);
+    if (error.response) {
+      console.error('SendGrid Error Response:', {
+        statusCode: error.code,
+        message: error.message
+      });
+    }
+    return false;
+  }
+}
 
 export async function sendEmailNotification(
   messageText: string,
@@ -55,7 +108,7 @@ export async function sendEmailNotification(
     await sesClient.send(command);
     console.log('Email notification sent successfully via AWS SES');
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to send email notification via AWS SES:', error);
     // Log detailed error information
     if (error.response) {
