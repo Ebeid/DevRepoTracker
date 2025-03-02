@@ -71,7 +71,7 @@ export async function sendPasswordResetEmail(
           Data: "Git-Plus Password Reset",
         },
       },
-      Source: FROM_EMAIL, // The sender email must be verified in SES
+      Source: NOTIFICATION_EMAIL, // Use the same email for Source as we do for notifications since it's likely verified
     });
 
     await sesClient.send(command);
