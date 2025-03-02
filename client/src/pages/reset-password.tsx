@@ -24,9 +24,11 @@ export default function ResetPasswordPage() {
 
   // Get token from URL
   useEffect(() => {
-    const params = new URLSearchParams(location.split("?")[1]);
+    // Extract query string and get token parameter
+    const queryString = location.includes('?') ? location.split('?')[1] : '';
+    const params = new URLSearchParams(queryString);
     const tokenParam = params.get("token");
-    
+
     if (tokenParam) {
       setToken(tokenParam);
     } else {
@@ -71,9 +73,9 @@ export default function ResetPasswordPage() {
         ...data,
         token,
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success) {
         setResetSuccess(true);
         toast({
@@ -145,7 +147,7 @@ export default function ResetPasswordPage() {
                 <div className="text-sm text-muted-foreground mb-4">
                   Please enter your new password below. Choose a strong password that is at least 8 characters long.
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="newPassword"
@@ -168,7 +170,7 @@ export default function ResetPasswordPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="confirmPassword"
@@ -191,7 +193,7 @@ export default function ResetPasswordPage() {
                     </FormItem>
                   )}
                 />
-                
+
                 <Button
                   type="submit"
                   className="w-full"
