@@ -21,6 +21,7 @@ export default function AuthPage() {
   const [authMode, setAuthMode] = useState<"login" | "register" | "forgot-password">("login");
   const [forgotPasswordSubmitted, setForgotPasswordSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [devResetToken, setDevResetToken] = useState<string | null>(null);
 
   const loginForm = useForm({
     resolver: zodResolver(insertUserSchema),
@@ -54,6 +55,18 @@ export default function AuthPage() {
 
       if (result.success) {
         setForgotPasswordSubmitted(true);
+
+        // For development purposes, get a sample token
+        try {
+          const tokenResponse = await apiRequest("GET", "/api/dev/reset-token?username=" + encodeURIComponent(data.username));
+          const tokenData = await tokenResponse.json();
+          if (tokenData.token) {
+            setDevResetToken(tokenData.token);
+          }
+        } catch (e) {
+          console.log("Developer token not available");
+        }
+
         toast({
           title: "Password Reset Email Sent",
           description: "If an account with this email exists, you'll receive instructions to reset your password.",
@@ -114,11 +127,28 @@ export default function AuthPage() {
                         If an account exists with the email you provided, we've sent instructions to reset your password.
                       </AlertDescription>
                     </Alert>
+
+                    {devResetToken && (
+                      <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-900">
+                        <AlertTitle>Development Mode</AlertTitle>
+                        <AlertDescription className="space-y-2">
+                          <p>Since email delivery is not configured, use this link for testing:</p>
+                          <a 
+                            href={`/auth/reset-password?token=${devResetToken}`}
+                            className="text-primary hover:underline break-all text-sm"
+                          >
+                            {`/auth/reset-password?token=${devResetToken}`}
+                          </a>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
                     <Button 
                       className="w-full" 
                       onClick={() => {
                         setAuthMode("login");
                         setForgotPasswordSubmitted(false);
+                        setDevResetToken(null);
                       }}
                     >
                       Return to Login

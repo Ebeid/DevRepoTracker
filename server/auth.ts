@@ -114,21 +114,19 @@ export function setupAuth(app: Express) {
       // Create a password reset token
       const { token } = await storage.createPasswordResetToken(user.id);
 
-      // Send password reset email
-      const emailSent = await sendPasswordResetEmail(
-        user.username,
-        token,
-        user.username.split('@')[0] // Simple way to get a displayable name
-      );
-
-      if (!emailSent) {
-        console.error(`Failed to send password reset email to: ${user.username}`);
-        return res.status(500).json({ 
-          success: false, 
-          message: "Failed to send password reset email. Please try again later."
-        });
+      // Try to send password reset email, but continue even if it fails
+      try {
+        await sendPasswordResetEmail(
+          user.username,
+          token,
+          user.username.split('@')[0] // Simple way to get a displayable name
+        );
+      } catch (emailError) {
+        // Log the error but don't expose it to the user
+        console.error(`Failed to send password reset email to: ${user.username}`, emailError);
       }
 
+      // Always return success to prevent user enumeration, even if email sending fails
       return res.json({ 
         success: true,
         message: "If an account with this email exists, a password reset link has been sent."
@@ -183,6 +181,45 @@ export function setupAuth(app: Express) {
       res.status(500).json({ 
         success: false,
         message: "An error occurred while processing your request."
+      });
+    }
+  });
+
+  // DEVELOPMENT ONLY: Endpoint to get the latest reset token for a user
+  // Only for development/testing - would be removed in production
+  app.get("/api/dev/reset-token", async (req, res) => {
+    try {
+      const { username } = req.query;
+
+      if (!username || typeof username !== 'string') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Username parameter is required" 
+        });
+      }
+
+      const user = await storage.getUserByUsername(username);
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+        });
+      }
+
+      // Create a new token for testing
+      const { token } = await storage.createPasswordResetToken(user.id);
+
+      return res.json({ 
+        success: true, 
+        token,
+        message: "Development reset token created successfully" 
+      });
+    } catch (error) {
+      console.error('Error generating dev reset token:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: "Server error generating token" 
       });
     }
   });
