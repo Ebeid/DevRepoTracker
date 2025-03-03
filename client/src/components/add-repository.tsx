@@ -15,21 +15,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { insertRepositorySchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Plus, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus } from "lucide-react";
 
 export default function AddRepository() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm({
-    resolver: zodResolver(insertRepositorySchema),
+    resolver: zodResolver(insertRepositorySchema.pick({ name: true, url: true })),
     defaultValues: {
       name: "",
-      fullName: "",
-      description: "",
       url: "",
-      stars: 0,
-      isPrivate: false,
     },
   });
 
@@ -38,31 +34,14 @@ export default function AddRepository() {
       const res = await apiRequest("POST", "/api/repositories", data);
       return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/repositories"] });
       setOpen(false);
       form.reset();
 
-      // Show notification status in toast
-      const notificationStatus = data.notification === 'queued' 
-        ? { icon: CheckCircle2, message: 'Repository added and notification queued successfully.' }
-        : { 
-            icon: AlertCircle, 
-            message: `Repository added but notification queuing had errors. ${
-              data.retryStatus 
-                ? `Retry attempt ${data.retryStatus.retryAttempts} of 3 scheduled.` 
-                : ''
-            }`
-          };
-
       toast({
         title: "Repository added",
-        description: (
-          <div className="flex items-center gap-2">
-            <notificationStatus.icon className={`w-4 h-4 ${data.notification === 'queued' ? 'text-green-500' : 'text-yellow-500'}`} />
-            <span>{notificationStatus.message}</span>
-          </div>
-        ),
+        description: "The repository has been added successfully.",
       });
     },
     onError: (error: Error) => {
@@ -98,20 +77,7 @@ export default function AddRepository() {
                 <FormItem>
                   <FormLabel>Repository Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="fullName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} placeholder="owner/repo" />
+                    <Input {...field} placeholder="my-awesome-repo" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -124,20 +90,7 @@ export default function AddRepository() {
                 <FormItem>
                   <FormLabel>Repository URL</FormLabel>
                   <FormControl>
-                    <Input {...field} type="url" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
+                    <Input {...field} type="url" placeholder="https://github.com/username/repo" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
