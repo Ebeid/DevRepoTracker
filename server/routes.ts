@@ -40,15 +40,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/repositories", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
 
-    const parsed = insertRepositorySchema.safeParse(req.body);
+    // Parse the minimal input fields
+    const parsed = insertRepositorySchema.pick({
+      name: true,
+      url: true,
+    }).safeParse(req.body);
+
     if (!parsed.success) {
       return res.status(400).json(parsed.error);
     }
 
-    const repository = await storage.addRepository(req.user.id, parsed.data);
+    // Auto-populate the fullName field from the URL
+    const urlParts = parsed.data.url.split('/');
+    const fullName = urlParts.slice(-2).join('/');
+
+    // Create the repository with required fields
+    const repository = await storage.addRepository(req.user.id, {
+      ...parsed.data,
+      fullName,
+      stars: 0,
+      isPrivate: false,
+    });
 
     // Send message to SQS queue about the new repository
-    let sqsError = null;
     try {
       const messageText = formatMessage('repository_added', {
         repository,
@@ -76,25 +90,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       console.log(`Successfully sent message to SQS for repository: ${repository.name}`);
+      res.status(201).json(repository);
     } catch (error) {
-      // Log the error but don't fail the request
+      // Log the error but still return success since the repository was created
       console.error('Failed to send message to SQS:', error);
-      sqsError = error;
-      res.setHeader('X-SQS-Error', 'Failed to send repository notification');
+      res.status(201).json({
+        ...repository,
+        notification: 'failed'
+      });
     }
-
-    // Get retry queue status if there was an error
-    const retryStatus = sqsError ? getRetryQueueStatus() : null;
-
-    res.status(201).json({
-      ...repository,
-      notification: sqsError ? 'queued_with_errors' : 'queued',
-      retryStatus: retryStatus ? {
-        inRetryQueue: true,
-        queueSize: retryStatus.queueSize,
-        retryAttempts: retryStatus.messages.length
-      } : null
-    });
   });
 
   app.get("/api/repositories/search", async (req, res) => {
