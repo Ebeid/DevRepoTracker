@@ -143,17 +143,8 @@ export default function RepositoryDetailsPage() {
 
               {/* Health Score and Analytics */}
               <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                  <CardContent>
-                    <RepositoryHealthScore repository={repository} />
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardContent>
-                    <RepositoryAnalytics repository={repository} />
-                  </CardContent>
-                </Card>
+                <RepositoryHealthScore repository={repository} />
+                <RepositoryAnalytics repository={repository} />
               </div>
 
               {/* Team Productivity */}
@@ -187,14 +178,10 @@ export default function RepositoryDetailsPage() {
               </Card>
 
               {/* Webhook Integration */}
-              <Card>
-                <CardContent>
-                  <RepositoryWebhook 
-                    repositoryId={repository.id}
-                    fullName={repository.fullName} 
-                  />
-                </CardContent>
-              </Card>
+              <RepositoryWebhook 
+                repositoryId={repository.id}
+                fullName={repository.fullName} 
+              />
             </div>
           </TabsContent>
         </Tabs>
