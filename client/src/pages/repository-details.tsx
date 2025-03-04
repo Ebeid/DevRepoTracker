@@ -4,6 +4,7 @@ import { Repository } from "@shared/schema";
 import { Loader2, ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RepositoryAnalytics from "@/components/repository-analytics";
 import RepositoryHealthScore from "@/components/repository-health-score";
 import RepositoryCodeSearch from "@/components/repository-code-search";
@@ -48,6 +49,7 @@ export default function RepositoryDetailsPage() {
   return (
     <div className="bg-background min-h-screen">
       <div className="container mx-auto px-4 py-8">
+        {/* Header Section */}
         <div className="mb-6">
           <Link href="/">
             <Button variant="ghost" size="sm" className="mb-4">
@@ -75,66 +77,87 @@ export default function RepositoryDetailsPage() {
           <p className="mt-4">{repository.description || "No description provided"}</p>
         </div>
 
-        <div className="mt-6">
-          <RepositoryEvolutionTimeline repository={repository} />
-        </div>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="code" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="code">Code</TabsTrigger>
+            <TabsTrigger value="experimental">Experimental Features</TabsTrigger>
+          </TabsList>
 
-        <RepositoryCodeSearch 
-          repositoryId={repository.id} 
-          repositoryName={repository.name} 
-        />
+          <TabsContent value="code">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Repository Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Basic repository information and code-related features will be added here.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div>
-            <RepositoryHealthScore repository={repository} />
-          </div>
+          <TabsContent value="experimental">
+            <div className="space-y-6">
+              {/* Evolution Timeline */}
+              <RepositoryEvolutionTimeline repository={repository} />
 
-          <div>
-            <Card>
-              <CardHeader>
-                <CardTitle>Repository Analytics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RepositoryAnalytics repository={repository} />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <TeamProductivityHeatmap 
-            repositoryId={repository.id} 
-            repositoryName={repository.name} 
-          />
-        </div>
-
-        <div className="mt-6">
-          <DeveloperCollaborationNetwork
-            repositoryId={repository.id}
-            repositoryName={repository.name}
-          />
-        </div>
-
-        <div className="mt-6">
-          <CodeComplexityHeatmap
-            repositoryId={repository.id}
-            repositoryName={repository.name}
-          />
-        </div>
-
-        <div className="mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Webhook Integration</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RepositoryWebhook 
-                repositoryId={repository.id}
-                fullName={repository.fullName} 
+              {/* Code Search */}
+              <RepositoryCodeSearch 
+                repositoryId={repository.id} 
+                repositoryName={repository.name} 
               />
-            </CardContent>
-          </Card>
-        </div>
+
+              {/* Health Score and Analytics */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <RepositoryHealthScore repository={repository} />
+                </div>
+                <div>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Repository Analytics</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <RepositoryAnalytics repository={repository} />
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+
+              {/* Team Productivity */}
+              <TeamProductivityHeatmap 
+                repositoryId={repository.id} 
+                repositoryName={repository.name} 
+              />
+
+              {/* Developer Collaboration */}
+              <DeveloperCollaborationNetwork
+                repositoryId={repository.id}
+                repositoryName={repository.name}
+              />
+
+              {/* Code Complexity */}
+              <CodeComplexityHeatmap
+                repositoryId={repository.id}
+                repositoryName={repository.name}
+              />
+
+              {/* Webhook Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Webhook Integration</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RepositoryWebhook 
+                    repositoryId={repository.id}
+                    fullName={repository.fullName} 
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
