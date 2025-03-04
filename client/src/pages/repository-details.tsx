@@ -1,10 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Repository } from "@shared/schema";
-import { Loader2, ArrowLeft, ExternalLink } from "lucide-react";
+import { Loader2, ArrowLeft, ExternalLink, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import RepositoryAnalytics from "@/components/repository-analytics";
 import RepositoryHealthScore from "@/components/repository-health-score";
 import RepositoryCodeSearch from "@/components/repository-code-search";
@@ -14,6 +20,25 @@ import DeveloperCollaborationNetwork from "@/components/developer-collaboration-
 import CodeComplexityHeatmap from "@/components/code-complexity-heatmap";
 import RepositoryEvolutionTimeline from "@/components/repository-evolution-timeline";
 import { Link } from "wouter";
+
+// Helper component for feature titles with tooltips
+function FeatureTitle({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span>{title}</span>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs text-sm">{description}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </div>
+  );
+}
 
 export default function RepositoryDetailsPage() {
   const [, params] = useRoute("/repository/:id");
@@ -100,53 +125,132 @@ export default function RepositoryDetailsPage() {
           <TabsContent value="experimental">
             <div className="space-y-6">
               {/* Evolution Timeline */}
-              <RepositoryEvolutionTimeline repository={repository} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Repository Evolution Timeline"
+                      description="Visualize the repository's growth and key events over time, including commits, stars, and contributor milestones."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RepositoryEvolutionTimeline repository={repository} />
+                </CardContent>
+              </Card>
 
               {/* Code Search */}
-              <RepositoryCodeSearch 
-                repositoryId={repository.id} 
-                repositoryName={repository.name} 
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Semantic Code Search"
+                      description="Search through your codebase using natural language queries powered by AI. Find relevant code snippets without knowing exact syntax."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RepositoryCodeSearch 
+                    repositoryId={repository.id} 
+                    repositoryName={repository.name} 
+                  />
+                </CardContent>
+              </Card>
 
               {/* Health Score and Analytics */}
               <div className="grid gap-6 md:grid-cols-2">
-                <div>
-                  <RepositoryHealthScore repository={repository} />
-                </div>
-                <div>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Repository Analytics</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <RepositoryAnalytics repository={repository} />
-                    </CardContent>
-                  </Card>
-                </div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      <FeatureTitle
+                        title="Repository Health Score"
+                        description="Get insights into your repository's overall health based on activity, maintenance, engagement, and collaboration metrics."
+                      />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RepositoryHealthScore repository={repository} />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>
+                      <FeatureTitle
+                        title="Repository Analytics"
+                        description="View detailed analytics about your repository's performance, including commits, pull requests, and contributor statistics."
+                      />
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <RepositoryAnalytics repository={repository} />
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Team Productivity */}
-              <TeamProductivityHeatmap 
-                repositoryId={repository.id} 
-                repositoryName={repository.name} 
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Team Productivity Heatmap"
+                      description="Analyze your team's productivity patterns with a visual heatmap showing commit activity across different time periods."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TeamProductivityHeatmap 
+                    repositoryId={repository.id} 
+                    repositoryName={repository.name} 
+                  />
+                </CardContent>
+              </Card>
 
               {/* Developer Collaboration */}
-              <DeveloperCollaborationNetwork
-                repositoryId={repository.id}
-                repositoryName={repository.name}
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Developer Collaboration Network"
+                      description="Explore the relationships between developers through a visual network graph based on code contributions and interactions."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DeveloperCollaborationNetwork
+                    repositoryId={repository.id}
+                    repositoryName={repository.name}
+                  />
+                </CardContent>
+              </Card>
 
               {/* Code Complexity */}
-              <CodeComplexityHeatmap
-                repositoryId={repository.id}
-                repositoryName={repository.name}
-              />
+              <Card>
+                <CardHeader>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Code Complexity Heatmap"
+                      description="Identify complex areas of your codebase through a visual heatmap highlighting code complexity metrics and potential refactoring targets."
+                    />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CodeComplexityHeatmap
+                    repositoryId={repository.id}
+                    repositoryName={repository.name}
+                  />
+                </CardContent>
+              </Card>
 
               {/* Webhook Integration */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Webhook Integration</CardTitle>
+                  <CardTitle>
+                    <FeatureTitle
+                      title="Webhook Integration"
+                      description="Set up real-time notifications for repository events like commits, pull requests, and more through webhook integration with GitHub."
+                    />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RepositoryWebhook 
