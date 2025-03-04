@@ -126,14 +126,6 @@ export default function RepositoryDetailsPage() {
             <div className="space-y-6">
               {/* Evolution Timeline */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Repository Evolution Timeline"
-                      description="Visualize the repository's growth and key events over time, including commits, stars, and contributor milestones."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <RepositoryEvolutionTimeline repository={repository} />
                 </CardContent>
@@ -141,14 +133,6 @@ export default function RepositoryDetailsPage() {
 
               {/* Code Search */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Semantic Code Search"
-                      description="Search through your codebase using natural language queries powered by AI. Find relevant code snippets without knowing exact syntax."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <RepositoryCodeSearch 
                     repositoryId={repository.id} 
@@ -160,28 +144,12 @@ export default function RepositoryDetailsPage() {
               {/* Health Score and Analytics */}
               <div className="grid gap-6 md:grid-cols-2">
                 <Card>
-                  <CardHeader>
-                    <CardTitle>
-                      <FeatureTitle
-                        title="Repository Health Score"
-                        description="Get insights into your repository's overall health based on activity, maintenance, engagement, and collaboration metrics."
-                      />
-                    </CardTitle>
-                  </CardHeader>
                   <CardContent>
                     <RepositoryHealthScore repository={repository} />
                   </CardContent>
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle>
-                      <FeatureTitle
-                        title="Repository Analytics"
-                        description="View detailed analytics about your repository's performance, including commits, pull requests, and contributor statistics."
-                      />
-                    </CardTitle>
-                  </CardHeader>
                   <CardContent>
                     <RepositoryAnalytics repository={repository} />
                   </CardContent>
@@ -190,14 +158,6 @@ export default function RepositoryDetailsPage() {
 
               {/* Team Productivity */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Team Productivity Heatmap"
-                      description="Analyze your team's productivity patterns with a visual heatmap showing commit activity across different time periods."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <TeamProductivityHeatmap 
                     repositoryId={repository.id} 
@@ -208,14 +168,6 @@ export default function RepositoryDetailsPage() {
 
               {/* Developer Collaboration */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Developer Collaboration Network"
-                      description="Explore the relationships between developers through a visual network graph based on code contributions and interactions."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <DeveloperCollaborationNetwork
                     repositoryId={repository.id}
@@ -226,14 +178,6 @@ export default function RepositoryDetailsPage() {
 
               {/* Code Complexity */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Code Complexity Heatmap"
-                      description="Identify complex areas of your codebase through a visual heatmap highlighting code complexity metrics and potential refactoring targets."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <CodeComplexityHeatmap
                     repositoryId={repository.id}
@@ -244,14 +188,6 @@ export default function RepositoryDetailsPage() {
 
               {/* Webhook Integration */}
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    <FeatureTitle
-                      title="Webhook Integration"
-                      description="Set up real-time notifications for repository events like commits, pull requests, and more through webhook integration with GitHub."
-                    />
-                  </CardTitle>
-                </CardHeader>
                 <CardContent>
                   <RepositoryWebhook 
                     repositoryId={repository.id}
