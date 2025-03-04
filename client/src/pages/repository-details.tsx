@@ -11,14 +11,13 @@ import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
 import RepositoryWebhook from "@/components/repository-webhook";
 import DeveloperCollaborationNetwork from "@/components/developer-collaboration-network";
 import CodeComplexityHeatmap from "@/components/code-complexity-heatmap";
+import RepositoryEvolutionTimeline from "@/components/repository-evolution-timeline";
 import { Link } from "wouter";
 
 export default function RepositoryDetailsPage() {
-  // Extract the repository ID from the URL
   const [, params] = useRoute("/repository/:id");
   const id = params?.id ? parseInt(params.id, 10) : undefined;
 
-  // Fetch repository details
   const { data: repositories, isLoading } = useQuery<Repository[]>({
     queryKey: ["/api/repositories"],
   });
@@ -76,19 +75,20 @@ export default function RepositoryDetailsPage() {
           <p className="mt-4">{repository.description || "No description provided"}</p>
         </div>
 
-        {/* Repository Code Search - Add at the top for prominence */}
+        <div className="mt-6">
+          <RepositoryEvolutionTimeline repository={repository} />
+        </div>
+
         <RepositoryCodeSearch 
           repositoryId={repository.id} 
           repositoryName={repository.name} 
         />
 
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Health Score Card - Prominently placed at the top */}
           <div>
             <RepositoryHealthScore repository={repository} />
           </div>
 
-          {/* Analytics Card */}
           <div>
             <Card>
               <CardHeader>
@@ -101,7 +101,6 @@ export default function RepositoryDetailsPage() {
           </div>
         </div>
 
-        {/* Team Productivity Heatmap */}
         <div className="mt-6">
           <TeamProductivityHeatmap 
             repositoryId={repository.id} 
@@ -109,7 +108,6 @@ export default function RepositoryDetailsPage() {
           />
         </div>
 
-        {/* Developer Collaboration Network */}
         <div className="mt-6">
           <DeveloperCollaborationNetwork
             repositoryId={repository.id}
@@ -117,7 +115,6 @@ export default function RepositoryDetailsPage() {
           />
         </div>
 
-        {/* Code Complexity Heatmap */}
         <div className="mt-6">
           <CodeComplexityHeatmap
             repositoryId={repository.id}
@@ -125,7 +122,6 @@ export default function RepositoryDetailsPage() {
           />
         </div>
 
-        {/* Repository Webhook Integration */}
         <div className="mt-6">
           <Card>
             <CardHeader>
