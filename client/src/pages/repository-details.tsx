@@ -16,6 +16,7 @@ import {
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { Link } from "wouter";
+import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
 
 // Mock data for branches and users
 const mockBranches = [
@@ -161,31 +162,9 @@ export default function RepositoryDetailsPage() {
               </Card>
             </div>
           </TabsContent>
+
           <TabsContent value="experimental">
             <div className="space-y-6">
-              {/* Evolution Timeline */}
-              <Card>
-                <CardContent>
-                  <RepositoryEvolutionTimeline repository={repository} />
-                </CardContent>
-              </Card>
-
-              {/* Code Search */}
-              <Card>
-                <CardContent>
-                  <RepositoryCodeSearch
-                    repositoryId={repository.id}
-                    repositoryName={repository.name}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Health Score and Analytics */}
-              <div className="grid gap-6 md:grid-cols-2">
-                <RepositoryHealthScore repository={repository} />
-                <RepositoryAnalytics repository={repository} />
-              </div>
-
               {/* Team Productivity */}
               <Card>
                 <CardContent>
@@ -195,32 +174,6 @@ export default function RepositoryDetailsPage() {
                   />
                 </CardContent>
               </Card>
-
-              {/* Developer Collaboration */}
-              <Card>
-                <CardContent>
-                  <DeveloperCollaborationNetwork
-                    repositoryId={repository.id}
-                    repositoryName={repository.name}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Code Complexity */}
-              <Card>
-                <CardContent>
-                  <CodeComplexityHeatmap
-                    repositoryId={repository.id}
-                    repositoryName={repository.name}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Webhook Integration */}
-              <RepositoryWebhook
-                repositoryId={repository.id}
-                fullName={repository.fullName}
-              />
             </div>
           </TabsContent>
         </Tabs>
