@@ -21,9 +21,24 @@ export function DateRangePicker({
   onDateChange,
   className,
 }: DateRangePickerProps) {
+  const [open, setOpen] = React.useState(false);
+  const [tempDateRange, setTempDateRange] = React.useState<DateRange | undefined>(date);
+
+  // Reset temp date range when popover opens
+  React.useEffect(() => {
+    if (open) {
+      setTempDateRange(date);
+    }
+  }, [open, date]);
+
+  const handleConfirm = () => {
+    onDateChange(tempDateRange);
+    setOpen(false);
+  };
+
   return (
     <div className={cn("grid gap-2", className)}>
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             id="date"
@@ -53,10 +68,18 @@ export function DateRangePicker({
             initialFocus
             mode="range"
             defaultMonth={date?.from}
-            selected={date}
-            onSelect={onDateChange}
+            selected={tempDateRange}
+            onSelect={setTempDateRange}
             numberOfMonths={2}
           />
+          <div className="flex justify-end gap-2 p-3 border-t">
+            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleConfirm}>
+              Confirm
+            </Button>
+          </div>
         </PopoverContent>
       </Popover>
     </div>
