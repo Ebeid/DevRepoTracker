@@ -107,6 +107,12 @@ export const resetPasswordSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Add new login schema
+export const loginSchema = z.object({
+  username: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Repository = typeof repositories.$inferSelect;
@@ -114,3 +120,4 @@ export type InsertRepository = z.infer<typeof insertRepositorySchema>;
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 export type InsertWebhookEvent = z.infer<typeof insertWebhookEventSchema>;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type LoginCredentials = z.infer<typeof loginSchema>;
