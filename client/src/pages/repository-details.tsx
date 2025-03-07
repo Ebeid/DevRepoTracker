@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Repository } from "@shared/schema";
@@ -6,43 +7,39 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import RepositoryAnalytics from "@/components/repository-analytics";
-import RepositoryHealthScore from "@/components/repository-health-score";
-import RepositoryCodeSearch from "@/components/repository-code-search";
-import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
-import RepositoryWebhook from "@/components/repository-webhook";
-import DeveloperCollaborationNetwork from "@/components/developer-collaboration-network";
-import CodeComplexityHeatmap from "@/components/code-complexity-heatmap";
-import RepositoryEvolutionTimeline from "@/components/repository-evolution-timeline";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
+import { DateRange } from "react-day-picker";
 import { Link } from "wouter";
 
-// Helper component for feature titles with tooltips
-function FeatureTitle({ title, description }: { title: string; description: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span>{title}</span>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
-          </TooltipTrigger>
-          <TooltipContent>
-            <p className="max-w-xs text-sm">{description}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
-  );
-}
+// Mock data for branches and users
+const mockBranches = [
+  { id: "main", name: "main" },
+  { id: "develop", name: "develop" },
+  { id: "feature/auth", name: "feature/auth" },
+  { id: "feature/analytics", name: "feature/analytics" },
+];
+
+const mockUsers = [
+  { id: "1", name: "Alex Johnson" },
+  { id: "2", name: "Sarah Chen" },
+  { id: "3", name: "Mike Brown" },
+  { id: "4", name: "Lisa Wong" },
+];
 
 export default function RepositoryDetailsPage() {
   const [, params] = useRoute("/repository/:id");
   const id = params?.id ? parseInt(params.id, 10) : undefined;
+
+  // Filter states
+  const [selectedBranch, setSelectedBranch] = useState<string>("main");
+  const [selectedUser, setSelectedUser] = useState<string | undefined>();
+  const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const { data: repositories, isLoading } = useQuery<Repository[]>({
     queryKey: ["/api/repositories"],
@@ -113,15 +110,57 @@ export default function RepositoryDetailsPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Repository Overview</CardTitle>
+                  <CardTitle>Commits</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Basic repository information and commit-related features will be added here.</p>
+                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                    <Select
+                      value={selectedBranch}
+                      onValueChange={setSelectedBranch}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select branch" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mockBranches.map((branch) => (
+                          <SelectItem key={branch.id} value={branch.id}>
+                            {branch.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <Select
+                      value={selectedUser}
+                      onValueChange={setSelectedUser}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All users</SelectItem>
+                        {mockUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    <DateRangePicker
+                      date={dateRange}
+                      onDateChange={setDateRange}
+                    />
+                  </div>
+                  <p className="text-muted-foreground">
+                    Selected filters: Branch: {selectedBranch},
+                    User: {selectedUser || "All"},
+                    Date Range: {dateRange?.from ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to?.toLocaleDateString() || "present"}` : "All time"}
+                  </p>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
-
           <TabsContent value="experimental">
             <div className="space-y-6">
               {/* Evolution Timeline */}
@@ -134,9 +173,9 @@ export default function RepositoryDetailsPage() {
               {/* Code Search */}
               <Card>
                 <CardContent>
-                  <RepositoryCodeSearch 
-                    repositoryId={repository.id} 
-                    repositoryName={repository.name} 
+                  <RepositoryCodeSearch
+                    repositoryId={repository.id}
+                    repositoryName={repository.name}
                   />
                 </CardContent>
               </Card>
@@ -150,9 +189,9 @@ export default function RepositoryDetailsPage() {
               {/* Team Productivity */}
               <Card>
                 <CardContent>
-                  <TeamProductivityHeatmap 
-                    repositoryId={repository.id} 
-                    repositoryName={repository.name} 
+                  <TeamProductivityHeatmap
+                    repositoryId={repository.id}
+                    repositoryName={repository.name}
                   />
                 </CardContent>
               </Card>
@@ -178,9 +217,9 @@ export default function RepositoryDetailsPage() {
               </Card>
 
               {/* Webhook Integration */}
-              <RepositoryWebhook 
+              <RepositoryWebhook
                 repositoryId={repository.id}
-                fullName={repository.fullName} 
+                fullName={repository.fullName}
               />
             </div>
           </TabsContent>
