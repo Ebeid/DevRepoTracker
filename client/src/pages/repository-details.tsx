@@ -110,11 +110,8 @@ export default function RepositoryDetailsPage() {
           <TabsContent value="commits">
             <div className="space-y-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Commits</CardTitle>
-                </CardHeader>
                 <CardContent>
-                  <div className="flex flex-col md:flex-row gap-4 mb-6">
+                  <div className="flex flex-col md:flex-row gap-4">
                     <Select
                       value={selectedBranch}
                       onValueChange={setSelectedBranch}
@@ -153,11 +150,6 @@ export default function RepositoryDetailsPage() {
                       onDateChange={setDateRange}
                     />
                   </div>
-                  <p className="text-muted-foreground">
-                    Selected filters: Branch: {selectedBranch},
-                    User: {selectedUser === "all" ? "All" : mockUsers.find(u => u.id === selectedUser)?.name},
-                    Date Range: {dateRange?.from ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to?.toLocaleDateString() || "present"}` : "All time"}
-                  </p>
                 </CardContent>
               </Card>
             </div>
