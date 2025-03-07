@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, X } from "lucide-react"
 import { DateRange } from "react-day-picker"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -36,6 +36,11 @@ export function DateRangePicker({
     setOpen(false);
   };
 
+  const handleClear = () => {
+    onDateChange(undefined);
+    setOpen(false);
+  };
+
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover open={open} onOpenChange={setOpen}>
@@ -50,14 +55,21 @@ export function DateRangePicker({
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {date?.from ? (
-              date.to ? (
-                <>
-                  {format(date.from, "LLL dd, y")} -{" "}
-                  {format(date.to, "LLL dd, y")}
-                </>
-              ) : (
-                format(date.from, "LLL dd, y")
-              )
+              <>
+                {format(date.from, "LLL dd, y")} -{" "}
+                {date.to ? format(date.to, "LLL dd, y") : ""}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-auto h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleClear();
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
             ) : (
               <span>Pick a date range</span>
             )}
