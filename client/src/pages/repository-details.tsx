@@ -110,7 +110,7 @@ export default function RepositoryDetailsPage() {
           <TabsContent value="commits">
             <div className="space-y-6">
               <Card>
-                <CardContent>
+                <CardContent className="py-6">
                   <div className="flex flex-col md:flex-row gap-4">
                     <Select
                       value={selectedBranch}
