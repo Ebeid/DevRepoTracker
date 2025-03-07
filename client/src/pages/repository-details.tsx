@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRoute } from "wouter";
 import { Repository } from "@shared/schema";
-import { Loader2, ArrowLeft, ExternalLink, GitBranch } from "lucide-react";
+import { Loader2, ArrowLeft, ExternalLink, GitBranch, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -135,6 +135,7 @@ export default function RepositoryDetailsPage() {
                         onValueChange={setSelectedUser}
                       >
                         <SelectTrigger className="w-[200px]">
+                          <Users className="mr-2 h-4 w-4" />
                           <SelectValue placeholder="Select user" />
                         </SelectTrigger>
                         <SelectContent>
