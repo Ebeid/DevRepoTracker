@@ -39,7 +39,7 @@ export default function RepositoryDetailsPage() {
 
   // Filter states
   const [selectedBranch, setSelectedBranch] = useState<string>("main");
-  const [selectedUser, setSelectedUser] = useState<string | undefined>();
+  const [selectedUser, setSelectedUser] = useState<string>("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
 
   const { data: repositories, isLoading } = useQuery<Repository[]>({
@@ -139,7 +139,7 @@ export default function RepositoryDetailsPage() {
                         <SelectValue placeholder="Select user" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All users</SelectItem>
+                        <SelectItem value="all">All users</SelectItem>
                         {mockUsers.map((user) => (
                           <SelectItem key={user.id} value={user.id}>
                             {user.name}
@@ -155,7 +155,7 @@ export default function RepositoryDetailsPage() {
                   </div>
                   <p className="text-muted-foreground">
                     Selected filters: Branch: {selectedBranch},
-                    User: {selectedUser || "All"},
+                    User: {selectedUser === "all" ? "All" : mockUsers.find(u => u.id === selectedUser)?.name},
                     Date Range: {dateRange?.from ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to?.toLocaleDateString() || "present"}` : "All time"}
                   </p>
                 </CardContent>
