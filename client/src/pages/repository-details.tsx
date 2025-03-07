@@ -103,20 +103,20 @@ export default function RepositoryDetailsPage() {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="code" className="space-y-6">
+        <Tabs defaultValue="commits" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="code">Code</TabsTrigger>
+            <TabsTrigger value="commits">Commits</TabsTrigger>
             <TabsTrigger value="experimental">Experimental Features</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="code">
+          <TabsContent value="commits">
             <div className="space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle>Repository Overview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>Basic repository information and code-related features will be added here.</p>
+                  <p>Basic repository information and commit-related features will be added here.</p>
                 </CardContent>
               </Card>
             </div>
