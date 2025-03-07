@@ -17,6 +17,7 @@ import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { Link } from "wouter";
 import TeamProductivityHeatmap from "@/components/team-productivity-heatmap";
+import CommitList from "@/components/commit-list";
 
 // Mock data for branches and users
 const mockBranches = [
@@ -156,6 +157,8 @@ export default function RepositoryDetailsPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              <CommitList />
             </div>
           </TabsContent>
 
