@@ -111,7 +111,7 @@ export default function RepositoryDetailsPage() {
             <div className="space-y-6">
               <Card>
                 <CardContent className="py-6">
-                  <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex flex-col md:flex-row justify-between gap-4">
                     <Select
                       value={selectedBranch}
                       onValueChange={setSelectedBranch}
@@ -128,27 +128,29 @@ export default function RepositoryDetailsPage() {
                       </SelectContent>
                     </Select>
 
-                    <Select
-                      value={selectedUser}
-                      onValueChange={setSelectedUser}
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Select user" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All users</SelectItem>
-                        {mockUsers.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <Select
+                        value={selectedUser}
+                        onValueChange={setSelectedUser}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select user" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All users</SelectItem>
+                          {mockUsers.map((user) => (
+                            <SelectItem key={user.id} value={user.id}>
+                              {user.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-                    <DateRangePicker
-                      date={dateRange}
-                      onDateChange={setDateRange}
-                    />
+                      <DateRangePicker
+                        date={dateRange}
+                        onDateChange={setDateRange}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
