@@ -91,6 +91,92 @@ npm run dev
    - Push events
    - Pull requests
 
+## Architecture
+
+Git-Plus follows a modern full-stack architecture with clear separation of concerns. The platform integrates multiple services to provide comprehensive repository management and real-time event processing capabilities.
+
+### System Architecture Diagram
+
+```mermaid
+flowchart TD
+  subgraph Client[Frontend (React + Vite)]
+    UI[React App]
+  end
+
+  subgraph Server[Backend (Express.js + TypeScript)]
+    API[REST API Routes]
+    Auth[Passport.js (Local Strategy + Sessions)]
+    Storage[Storage Interface]
+    Webhook[GitHub Webhook Endpoint]
+    Email[Email Service (SES/SendGrid)]
+    Retry[Message Retry Handler]
+  end
+
+  subgraph DB[PostgreSQL (Drizzle ORM)]
+    Users[(users)]
+    Repos[(repositories)]
+    Events[(webhook_events)]
+    Reset[(password_reset_tokens)]
+  end
+
+  subgraph GitHub[GitHub]
+    GHAPI[GitHub API]
+    GHWebhooks[GitHub Webhooks]
+  end
+
+  subgraph AWS[AWS]
+    SQS[(SQS Queue)]
+    SES[AWS SES]
+    SendGrid[SendGrid]
+  end
+
+  subgraph JavaSvc[Java Microservice]
+    Consumer[SQS Consumer (Java)]
+    Processor[MessageProcessor]
+  end
+
+  UI -->|HTTP (React Query)| API
+  API -->|Session auth| Auth
+  API -->|CRUD via Storage| Storage -->|SQL| DB
+
+  UI -->|POST /api/repositories| API
+  API -->|Send RepositoryEvent| SQS
+
+  GHWebhooks -->|POST /api/webhook/:id| Webhook
+  Webhook -->|Verify HMAC| Webhook
+  Webhook -->|Persist event| Events
+  Webhook -->|Send templated message| SQS
+
+  Consumer -->|Poll messages| SQS
+  Consumer --> Processor
+
+  API -->|Password reset/notifications| Email
+  Email --> SES
+  Email -->|fallback| SendGrid
+
+  API -->|Outbound calls| GHAPI
+
+  Retry -. requeue on failure .-> SQS
+```
+
+### Key Components
+
+- **Frontend (React + Vite)**: Modern React application with TypeScript, TanStack Query for state management, and shadcn/ui components
+- **Backend (Express.js)**: RESTful API server with Passport.js authentication and session management
+- **Database (PostgreSQL)**: Relational database with Drizzle ORM for type-safe operations
+- **GitHub Integration**: Direct webhook integration for real-time repository events
+- **AWS SQS**: Message queue for reliable asynchronous event processing
+- **Java Microservice**: Dedicated SQS consumer for processing repository events
+- **Email Services**: AWS SES and SendGrid for notifications and password resets
+
+### Data Flow
+
+1. **User Authentication**: Session-based authentication with encrypted passwords
+2. **Repository Management**: CRUD operations with automatic SQS notifications
+3. **Webhook Processing**: GitHub webhooks are verified (HMAC) and stored, then forwarded to SQS
+4. **Asynchronous Processing**: Java microservice consumes SQS messages for background processing
+5. **Email Notifications**: Automated emails for password resets and system notifications
+
 ## Project Structure
 ```
 ├── client/                 # Frontend React application
