@@ -99,8 +99,8 @@ Git-Plus follows a modern full-stack architecture with clear separation of conce
 
 ```mermaid
 flowchart TD
-  subgraph Client[Frontend (React + Vite)]
-    UI[React App]
+  subgraph Client
+    UI[Frontend React + Vite]
   end
 
   subgraph Server[Backend (Express.js + TypeScript)]
